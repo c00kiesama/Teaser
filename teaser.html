@@ -1,0 +1,1830 @@
+<!DOCTYPE html>
+<html lang="cs">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>HRA NA VRAHY — Klínovec 2026</title>
+  <link href="https://fonts.googleapis.com/css2?family=Share+Tech+Mono&family=Bebas+Neue:wght@400&display=swap" rel="stylesheet">
+  <style>
+
+  @import url('https://fonts.googleapis.com/css2?family=Share+Tech+Mono&display=swap');
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    background: #080808;
+    color: #f0f0f0;
+    font-family: 'Share Tech Mono', 'Courier New', monospace;
+    min-height: 100vh;
+    overflow-x: hidden;
+  }
+
+  /* Scanlines odstraněny */
+
+  /* Top accent */
+  body::after {
+    content: '';
+    position: fixed;
+    top: 0; left: 0; right: 0;
+    height: 2px;
+    background: #fff;
+    box-shadow: 0 0 8px rgba(255,255,255,0.6);
+    z-index: 1000;
+  }
+
+  /* ===== THEME TOGGLE ===== */
+  .theme-toggle {
+    position: fixed;
+    top: 16px;
+    right: 16px;
+    z-index: 200;
+    background: #080808;
+    border: 1px solid #333;
+    border-radius: 0;
+    padding: 6px 12px;
+    cursor: pointer;
+    font-size: 0.65rem;
+    letter-spacing: 0.15rem;
+    color: #a0a0a0;
+    font-family: 'Share Tech Mono', monospace;
+    transition: all 0.2s;
+    text-transform: uppercase;
+  }
+  .theme-toggle:hover { border-color: #fff; color: #fff; font-weight: 400; }
+
+
+
+  @media (max-width: 600px) {
+    .container { padding: 1rem 1rem 3rem; }
+    h1 { font-size: 1.8rem; }
+    input[type="text"], input[type="email"], input[type="password"] { font-size: 0.9rem; }
+    .btn { min-height: 52px; }
+    .card { padding: 1.25rem 1rem; }
+    .countdown-seg {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: clamp(2.4rem, 7vw, 3.8rem);
+    color: #ffffff;
+    letter-spacing: 0.05rem;
+    line-height: 1;
+    text-shadow: 0 0 20px rgba(26,96,208,0.5);
+    display: block;
+  }
+    .admin-tab { font-size: 0.55rem; }
+  }
+
+  /* ===== FONT WEIGHT - čitelnost ===== */
+  .card-title { font-weight: 600 !important; letter-spacing: 0.3rem; }
+  .faq-question { font-weight: 500 !important; font-size: 0.88rem !important; }
+  .faq-answer-inner { font-weight: 400; color: #ddd !important; }
+  .db-table td { font-weight: 400; }
+  .db-table .td-name { font-weight: 600 !important; color: #fff !important; }
+  .lobby-name { font-weight: 500 !important; color: #fff !important; }
+  .kill-main { font-weight: 500 !important; color: #fff !important; }
+  .player-name { font-weight: 500 !important; color: #fff !important; }
+  .chain-name { font-weight: 500 !important; color: #eee !important; }
+  .badge-alive { font-weight: 600 !important; color: #fff !important; }
+  .stat-number { font-weight: 400; letter-spacing: 0.05em; }
+  .admin-tab { font-weight: 500 !important; }
+  .admin-tab.active { font-weight: 600 !important; color: #fff !important; }
+  .warning-banner { font-weight: 600 !important; color: #fff !important; letter-spacing: 0.2rem; }
+  label { font-weight: 500 !important; color: #bbb !important; }
+  .footer-nav a { font-weight: 500 !important; color: #aaa !important; }
+  .footer-nav a:hover { color: #fff !important; }
+  .countdown-label { font-weight: 500 !important; color: #aaa !important; }
+  .countdown-unit-label { font-weight: 600 !important; color: #aaa !important; }
+  .target-label { font-weight: 600 !important; color: #aaa !important; }
+  .target-name { font-weight: 400; color: #fff !important; }
+  .winner-label { font-weight: 600 !important; color: #bbb !important; }
+  .lobby-count-label { font-weight: 500 !important; color: #aaa !important; }
+  .qr-label { font-weight: 500 !important; color: #aaa !important; }
+  .db-refresh { color: #888 !important; }
+  .empty-state { color: #666 !important; font-weight: 400; }
+  .header-sub { font-weight: 500 !important; color: #888 !important; }
+  input, .btn { font-weight: 500 !important; }
+
+
+/* ===== LIGHT MODE ===== */
+  /* Light mode = bílé pozadí, černé texty */
+  body.light { background: #f8f8f8; color: #787878; }
+  body.light::after { background: #111; box-shadow: none; }
+  body.light .card { background: #fff; border-color: #ddd; box-shadow: 0 1px 4px rgba(0,0,0,0.06); }
+  body.light .card::before { background: #111; opacity: 0.08; }
+  body.light .card::after { display: none; }
+  body.light .card-title { color: #787878; }
+  body.light .card-title::before { color: #787878; opacity: 0.5; }
+  body.light .theme-toggle { background: #fff; border-color: #ccc; color: #a0a0a0; }
+  body.light .theme-toggle:hover { border-color: #787878; color: #787878; }
+  body.light input[type="text"], body.light input[type="email"],
+  body.light input[type="password"], body.light input[type="date"],
+  body.light input[type="time"] {
+    background: #f4f4f4; border-color: #ddd; color: #787878; color-scheme: light;
+  }
+  body.light input:focus { border-color: #787878; background: #fff; box-shadow: 0 0 0 1px rgba(0,0,0,0.1); }
+  body.light input::placeholder { color: #d2d2d2; }
+  body.light label { color: #bebebe; }
+  body.light label::before { color: #787878; }
+  body.light .stat { background: #fff; border-color: #ddd; }
+  body.light .stat-number { color: #787878; text-shadow: none; }
+  body.light .stat-label { color: #d2d2d2; }
+  body.light .stats-grid { background: #eee; }
+  body.light .btn-primary { background: #111; color: #fff; border-color: #787878; box-shadow: none; }
+  body.light .btn-primary:hover { background: #333; border-color: #787878; box-shadow: none; }
+  body.light .btn-ghost { color: #bebebe; border-color: #ddd; }
+  body.light .btn-ghost:hover { color: #787878; border-color: #d2d2d2; background: transparent; }
+  body.light .btn-danger { color: #787878; border-color: #bebebe; }
+  body.light .btn-danger:hover { background: #111; color: #fff; border-color: #787878; }
+  body.light .alert-success { background: #f4f4f4; border-color: #ccc; color: #787878; }
+  body.light .alert-error { background: #f4f4f4; border-color: #d2d2d2; color: #787878; }
+  body.light .alert-info { background: #f4f4f4; border-color: #ccc; color: #a0a0a0; }
+  body.light .footer-nav a { color: #d2d2d2; }
+  body.light .footer-nav a:hover { color: #787878; }
+  body.light .header-ornament { color: #bebebe; }
+  body.light h1 { color: #787878; text-shadow: none; }
+  body.light .header-sub { color: #d2d2d2; }
+  body.light .warning-banner { background: transparent; border-color: #787878; border-left-color: #787878; color: #787878; }
+  body.light .warning-bang { color: #787878; }
+  body.light .db-table th { color: #d2d2d2; border-color: #fff; font-weight: 400; }
+  body.light .db-table td { border-color: #f0f0f0; color: #bebebe; }
+  body.light .db-table .td-name { color: #787878; }
+  body.light .db-table .td-weapon { color: #a0a0a0; }
+  body.light .db-table tr:hover td { background: #fafafa; }
+  body.light .db-refresh { color: #ccc; }
+  body.light .faq-item { border-color: #fff; font-weight: 400; }
+  body.light .faq-question { color: #bebebe; }
+  body.light .faq-question::before { color: #d2d2d2; }
+  body.light .faq-question:hover { color: #787878; }
+  body.light .faq-arrow { color: #787878; opacity: 0.3; }
+  body.light .faq-item.open .faq-arrow { opacity: 0.8; }
+  body.light .faq-answer { color: #a0a0a0; }
+  body.light .lobby-item { border-color: #fff; font-weight: 400; }
+  body.light .lobby-name { color: #787878; }
+  body.light .lobby-count { color: #787878; }
+  body.light .lobby-count-label { color: #d2d2d2; }
+  body.light .lobby-dot { background: #111; box-shadow: 0 0 4px rgba(0,0,0,0.3); }
+  body.light .lobby-index { color: #ccc; }
+  body.light .lobby-joined { color: #ccc; }
+  body.light .empty-state { color: #ccc; }
+  body.light .kill-main { color: #787878; }
+  body.light .kill-meta { color: #d2d2d2; }
+  body.light .kill-weapon { color: #a0a0a0; }
+  body.light .kill-number { color: #787878; text-shadow: none; }
+  body.light .chain-name { color: #787878; border-color: #ddd; background: #f8f8f8; }
+  body.light .chain-name.dead { color: #ccc; border-color: #fff; font-weight: 400; }
+  body.light .chain-arrow { color: #d2d2d2; }
+  body.light .admin-tabs { background: #f4f4f4; border-color: #ffffff; }
+  body.light .admin-tab { color: #d2d2d2; }
+  body.light .admin-tab:hover { color: #a0a0a0; background: transparent; }
+  body.light .admin-tab.active { background: #fff; color: #787878; border-color: #ccc; text-shadow: none; }
+  body.light .countdown-label { color: #d2d2d2; }
+  body.light .countdown-sub { color: #d2d2d2; }
+  body.light .countdown-seg { color: #787878; text-shadow: none; background: #f4f4f4; border-color: #ddd; }
+  body.light .countdown-seg-ms { color: #d2d2d2; }
+  body.light .countdown-sep { color: #ccc; }
+  body.light .countdown-unit-label { color: #d2d2d2; }
+  body.light .countdown-box.urgent .countdown-seg { color: #787878; background: #eee; border-color: #bebebe; }
+  body.light .target-reveal { background: #f8f8f8; border-color: #ddd; box-shadow: none; }
+  body.light .target-label { color: #d2d2d2; }
+  body.light .target-name { color: #787878; text-shadow: none; }
+  body.light .target-weapon { color: #a0a0a0; }
+  body.light .winner-name { color: #787878; text-shadow: none; }
+  body.light .winner-label { color: #bebebe; }
+  body.light .winner-result-name { color: #787878; }
+  body.light .winner-result-label { color: #bebebe; }
+  body.light .qr-box { border-color: #eee; background: #fff; }
+  body.light .qr-label { color: #d2d2d2; }
+  body.light .qr-url { color: #ccc; }
+  body.light .badge-alive { background: rgba(0,0,0,0.04); color: #787878; border-color: #ccc; }
+  body.light .badge-dead { color: #ccc; border-color: #fff; font-weight: 400; }
+  body.light .page-footer { border-color: #fff; font-weight: 400; }
+  body.light .trask-logo-text { color: #ddd; }
+  body.light .footer-dept { color: #ffffff; }
+  body.light .footer-copyright { color: #ffffff; }
+  body.light #bg-canvas { opacity: 1; }
+
+  /* ===== GLITCH ANIMACE ===== */
+  @keyframes glitch1 {
+    0%, 90%, 100% { clip-path: none; transform: none; }
+    91% { clip-path: polygon(0 20%, 100% 20%, 100% 40%, 0 40%); transform: translateX(-4px); }
+    92% { clip-path: polygon(0 60%, 100% 60%, 100% 80%, 0 80%); transform: translateX(4px); }
+    93% { clip-path: none; transform: none; }
+    96% { clip-path: polygon(0 10%, 100% 10%, 100% 30%, 0 30%); transform: translateX(6px); }
+    97% { clip-path: none; transform: none; }
+  }
+
+  @keyframes glitch2 {
+    0%, 88%, 100% { opacity: 0; }
+    89% { opacity: 1; transform: translateX(3px); filter: hue-rotate(90deg); }
+    90% { opacity: 0; }
+    94% { opacity: 1; transform: translateX(-3px); filter: hue-rotate(180deg); }
+    95% { opacity: 0; }
+  }
+
+  @keyframes scanGlitch {
+    0%, 95%, 100% { transform: translateY(0); opacity: 1; }
+    96% { transform: translateY(-2px); opacity: 0.8; }
+    97% { transform: translateY(2px); opacity: 0.9; }
+    98% { transform: translateY(0); opacity: 1; }
+  }
+
+  @keyframes blink {
+    0%, 49% { opacity: 1; }
+    50%, 100% { opacity: 0; }
+  }
+
+  @keyframes fadeIn {
+    from { opacity: 0; transform: translateY(6px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+  @keyframes dangerBlink {
+    0%, 80%, 100% { opacity: 1; }
+    85% { opacity: 0.2; }
+    90% { opacity: 1; }
+    95% { opacity: 0.4; }
+  }
+
+  @keyframes spin { to { transform: rotate(360deg); } }
+  @keyframes urgentPulse { 0%,100% { opacity:1; } 50% { opacity:0.4; } }
+  @keyframes pulse { 0%,100% { opacity:1; transform:scale(1); } 50% { opacity:0.4; transform:scale(0.7); } }
+
+  /* ===== CONTAINER ===== */
+  #bg-canvas {
+    position: fixed;
+    inset: 0;
+    pointer-events: none;
+    z-index: 0;
+  }
+
+  .container {
+    position: relative;
+    z-index: 1;
+    max-width: 540px;
+    margin: 0 auto;
+    padding: 2rem 1.5rem 4rem;
+  }
+
+  /* ===== HEADER ===== */
+  .header {
+    text-align: center;
+    margin-bottom: 3rem;
+    padding-top: 2.5rem;
+    position: relative;
+    animation: scanGlitch 8s infinite;
+  }
+
+  .header-ornament {
+    transition: opacity 0.4s ease;
+    font-size: 0.6rem;
+    letter-spacing: 0.5rem;
+    color: #d2d2d2;
+    text-transform: uppercase;
+    margin-bottom: 1rem;
+    animation: dangerBlink 4s ease-in-out infinite;
+    opacity: 0.5;
+  }
+
+  h1 {
+    font-size: clamp(2.5rem, 7vw, 4rem);
+    font-weight: 400;
+    color: #fff;
+    letter-spacing: 0.15em;
+    line-height: 1.05;
+    margin-bottom: 0.5rem;
+    font-family: 'Bebas Neue', 'Share Tech Mono', monospace;
+    position: relative;
+    animation: glitch1 6s infinite;
+    text-transform: uppercase;
+  }
+
+  h1::after {
+    content: attr(data-text);
+    position: absolute;
+    left: 0; top: 0;
+    color: #fff;
+    animation: glitch2 6s infinite;
+    pointer-events: none;
+  }
+
+  .header-sub {
+    font-size: 0.65rem;
+    letter-spacing: 0.25rem;
+    color: #bebebe;
+    text-transform: uppercase;
+  }
+
+  /* ===== WARNING BANNER ===== */
+  .warning-banner {
+    display: block;
+    background: transparent;
+    border: 1px solid #bbb;
+    border-left: 3px solid #fff;
+    padding: 0.6rem 1rem;
+    margin-bottom: 1.5rem;
+    font-size: 0.65rem;
+    letter-spacing: 0.15rem;
+    color: #fff;
+    text-transform: uppercase;
+    animation: scanGlitch 5s infinite;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    width: 100%;
+    box-sizing: border-box;
+  }
+
+  /* ===== PANELS ===== */
+  .panel { display: none; }
+  .panel.active { display: block; animation: fadeIn 0.3s ease; }
+
+  /* ===== CARDS ===== */
+  .card {
+    background: rgba(12,12,12,0.95);
+    border: 1px solid #444;
+    border-radius: 0;
+    padding: 1.75rem;
+    margin-bottom: 1.25rem;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .card::before {
+    content: '';
+    position: absolute;
+    top: 0; left: 0; right: 0;
+    height: 1px;
+    background: #fff;
+    opacity: 0.15;
+  }
+
+  /* Glitch border efekt */
+  .card::after {
+    content: '';
+    position: absolute;
+    top: 0; left: -100%;
+    width: 100%; height: 1px;
+    background: linear-gradient(90deg, transparent, #fff, transparent);
+    animation: scanLine 8s linear infinite;
+    opacity: 0.3;
+  }
+
+  @keyframes scanLine {
+    0% { left: -100%; }
+    100% { left: 100%; }
+  }
+
+  .card-title {
+    font-size: 0.6rem;
+    letter-spacing: 0.3rem;
+    color: #ccc;
+    text-transform: uppercase;
+    margin-bottom: 1.5rem;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+  }
+  .card-title::before { content: '> '; color: #fff; opacity: 0.4; }
+
+  /* ===== FORM ===== */
+  .field { margin-bottom: 1.25rem; }
+
+  label {
+    display: block;
+    font-size: 0.6rem;
+    letter-spacing: 0.2rem;
+    color: #787878;
+    text-transform: uppercase;
+    margin-bottom: 0.5rem;
+  }
+  label::before { content: '$ '; color: #d2d2d2; }
+
+  input[type="text"],
+  input[type="email"],
+  input[type="password"],
+  input[type="date"],
+  input[type="time"] {
+    width: 100%;
+    background: rgba(255,255,255,0.03);
+    border: 1px solid #333;
+    border-radius: 0;
+    padding: 0.8rem 1rem;
+    color: #fff;
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 0.9rem;
+    transition: all 0.15s;
+    outline: none;
+    color-scheme: dark;
+  }
+  input:focus {
+    border-color: #fff;
+    background: rgba(255,255,255,0.05);
+    box-shadow: 0 0 0 1px rgba(255,255,255,0.1);
+  }
+  input::placeholder { color: #787878; }
+
+  /* ===== BUTTONS ===== */
+  .btn {
+    width: 100%;
+    padding: 0.875rem 1.5rem;
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 0.75rem;
+    font-weight: 400;
+    letter-spacing: 0.2rem;
+    text-transform: uppercase;
+    cursor: pointer;
+    border-radius: 0;
+    transition: all 0.15s;
+    border: none;
+    min-height: 52px;
+  }
+
+  .btn-primary {
+    background: #fff;
+    color: #787878;
+    border: 1px solid #fff;
+  }
+  .btn-primary:hover {
+    background: transparent;
+    color: #fff;
+    box-shadow: 0 0 15px rgba(255,255,255,0.15);
+  }
+  .btn-primary:disabled {
+    background: transparent;
+    color: #787878;
+    border-color: #787878;
+    cursor: not-allowed;
+  }
+
+  .btn-ghost {
+    background: transparent;
+    color: #787878;
+    border: 1px solid #222;
+  }
+  .btn-ghost:hover { border-color: #d2d2d2; color: #d2d2d2; }
+
+  .btn-danger {
+    background: transparent;
+    color: #fff;
+    border: 1px solid #fff;
+  }
+  .btn-danger:hover {
+    background: #fff;
+    color: #787878;
+    box-shadow: 0 0 15px rgba(255,255,255,0.2);
+  }
+
+  /* ===== ALERTS ===== */
+  .alert {
+    padding: 0.75rem 1rem;
+    border-radius: 0;
+    font-size: 0.78rem;
+    margin-bottom: 1rem;
+    border: 1px solid;
+    font-family: 'Share Tech Mono', monospace;
+    letter-spacing: 0.05rem;
+  }
+  .alert-success { background: rgba(255,255,255,0.04); border-color: #787878; color: #d2d2d2; }
+  .alert-success::before { content: '[OK] '; color: #fff; opacity: 0.6; }
+  .alert-error { background: rgba(255,255,255,0.03); border-color: #a0a0a0; color: #d2d2d2; }
+  .alert-error::before { content: '[ERR] '; color: #fff; opacity: 0.6; }
+  .alert-info { background: rgba(255,255,255,0.02); border-color: #787878; color: #a0a0a0; }
+  .alert-info::before { content: '[SYS] '; color: #d2d2d2; opacity: 0.6; }
+
+  /* ===== STATS ===== */
+  .stats-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 2px;
+    margin-bottom: 1.25rem;
+    background: #111;
+  }
+  .stat {
+    background: #0c0c0c;
+    border: 1px solid #444;
+    border-radius: 0;
+    padding: 1rem;
+    text-align: center;
+  }
+  .stat-number {
+    font-size: 1.8rem;
+    font-weight: 400;
+    color: #fff;
+    letter-spacing: 0.05em;
+    font-family: 'Share Tech Mono', monospace;
+    text-shadow: 0 0 15px rgba(255,255,255,0.5);
+  }
+  .stat-label {
+    font-size: 0.55rem;
+    letter-spacing: 0.2rem;
+    color: #bebebe;
+    text-transform: uppercase;
+    margin-top: 3px;
+  }
+
+  /* ===== LOADING ===== */
+  .loading {
+    display: inline-block;
+    width: 10px; height: 10px;
+    border: 1px solid #222;
+    border-top-color: #fff;
+    border-radius: 50%;
+    animation: spin 0.8s linear infinite;
+    margin-right: 8px;
+    vertical-align: middle;
+  }
+
+  /* ===== FOOTER NAV ===== */
+  .footer-nav { text-align: center; margin-top: 1.5rem; }
+  .footer-nav a {
+    color: #bebebe;
+    font-size: 0.65rem;
+    letter-spacing: 0.15rem;
+    text-decoration: none;
+    cursor: pointer;
+    font-family: 'Share Tech Mono', monospace;
+    text-transform: uppercase;
+    transition: color 0.2s;
+  }
+  .footer-nav a:hover { color: #fff; font-weight: 400; }
+
+  /* ===== BADGES ===== */
+  .badge {
+    display: inline-block;
+    padding: 2px 8px;
+    font-size: 0.55rem;
+    letter-spacing: 0.12rem;
+    text-transform: uppercase;
+    border-radius: 0;
+    font-family: 'Share Tech Mono', monospace;
+  }
+  .badge-alive { background: rgba(255,255,255,0.06); color: #eee; border: 1px solid #888; }
+  .badge-dead { background: transparent; color: #787878; border: 1px solid #777; text-decoration: line-through; }
+
+  /* ===== TABLE ===== */
+  .db-table { width: 100%; border-collapse: collapse; font-size: 0.75rem; font-family: 'Share Tech Mono', monospace; }
+  .db-table th { font-size: 0.55rem; letter-spacing: 0.15rem; text-transform: uppercase; color: #bebebe; padding: 0.5rem 0.75rem; border-bottom: 1px solid #333; text-align: left; white-space: nowrap; }
+  .db-table td { padding: 0.6rem 0.75rem; border-bottom: 1px solid #111; color: #ccc; vertical-align: top; }
+  .db-table tr:last-child td { border-bottom: none; }
+  .db-table tr:hover td { background: rgba(255,255,255,0.02); }
+  .db-table .td-name { color: #fff; font-weight: 400; }
+  .db-table .td-weapon { color: #ccc; font-style: italic; }
+  .db-table .td-target { color: #787878; font-size: 0.7rem; }
+  .db-table-wrap { overflow-x: auto; }
+  .db-refresh { font-size: 0.6rem; color: #a0a0a0; text-align: right; margin-top: 0.5rem; }
+
+  /* ===== KILL ROWS ===== */
+  .kill-row { display: flex; align-items: flex-start; gap: 1rem; padding: 0.75rem 0; border-bottom: 1px solid #222; }
+  .kill-row:last-child { border-bottom: none; }
+  .kill-number { font-size: 1rem; color: #fff; min-width: 2rem; line-height: 1; font-family: 'Share Tech Mono', monospace; }
+  .kill-detail { flex: 1; }
+  .kill-main { font-size: 0.85rem; color: #fff; margin-bottom: 2px; }
+  .kill-meta { font-size: 0.68rem; color: #bebebe; }
+  .kill-weapon { font-size: 0.7rem; color: #d2d2d2; font-style: italic; }
+
+  /* ===== COUNTDOWN ===== */
+  .countdown-box { text-align: center; padding: 2rem 0 1rem; display: none; }
+  .countdown-box.visible { display: block; }
+  .countdown-box.visible { display: block; }
+  .countdown-label { font-size: 0.6rem; letter-spacing: 0.3rem; color: #bebebe; text-transform: uppercase; margin-bottom: 1.25rem; font-family: 'Share Tech Mono', monospace; }
+  .countdown-display { display: inline-flex; align-items: flex-start; gap: 0; justify-content: center; }
+  .countdown-inner { display: flex; align-items: flex-end; justify-content: center; gap: 0.5rem; margin-bottom: 0.5rem; }
+  .countdown-unit { display: flex; flex-direction: column; align-items: center; gap: 6px; }
+  .countdown-seg {
+    font-family: 'Bebas Neue', 'Share Tech Mono', monospace;
+    font-size: clamp(2.5rem, 7vw, 4rem);
+    color: #fff;
+    text-shadow: 0 0 10px rgba(255,255,255,0.3);
+    line-height: 1;
+    letter-spacing: 0.08em;
+    min-width: 2ch;
+    text-align: center;
+    background: rgba(255,255,255,0.04);
+    border: 1px solid #222;
+    border-radius: 0;
+    padding: 8px 12px;
+  }
+  .countdown-seg-ms {
+    font-family: 'Bebas Neue', monospace;
+    font-size: clamp(1.5rem, 4vw, 2.5rem);
+    color: #a0a0a0;
+    min-width: 3ch;
+  }
+  .countdown-unit-label { font-size: 0.5rem; letter-spacing: 0.2rem; color: #bebebe; text-transform: uppercase; font-family: 'Share Tech Mono', monospace; }
+  .countdown-sep { font-family: 'Bebas Neue', monospace; font-size: clamp(2rem, 6vw, 3.2rem); color: #a0a0a0; line-height: 1; padding: 8px 2px 0; align-self: flex-start; }
+  .countdown-sep-ms { font-size: clamp(1.4rem, 4vw, 2.2rem); padding-top: 12px; }
+  .countdown-box.urgent .countdown-seg { color: #fff; text-shadow: 0 0 20px rgba(255,255,255,0.5); border-color: #a0a0a0; background: rgba(255,255,255,0.08); animation: urgentPulse 0.5s ease-in-out infinite; }
+  .countdown-sub { font-size: 0.6rem; color: #bebebe; margin-top: 1rem; letter-spacing: 0.15rem; font-family: 'Share Tech Mono', monospace; }
+
+  /* ===== SKULL / KILL PAGE ===== */
+  .skull { text-align: center; font-size: 4rem; margin: 1.5rem 0; filter: grayscale(1); }
+  .target-reveal {
+    background: rgba(255,255,255,0.03);
+    border: 1px solid #333;
+    border-radius: 0;
+    padding: 1.5rem;
+    text-align: center;
+    margin: 1.5rem 0;
+  }
+  .target-label { font-size: 0.6rem; letter-spacing: 0.2rem; color: #bebebe; text-transform: uppercase; margin-bottom: 0.5rem; font-family: 'Share Tech Mono', monospace; }
+  .target-name { font-size: 1.8rem; color: #fff; font-family: 'Share Tech Mono', monospace; animation: glitch1 4s infinite; }
+  .target-weapon { font-size: 0.85rem; color: #d2d2d2; font-style: italic; margin-top: 0.25rem; }
+
+  /* ===== WINNER ===== */
+  .winner-box { text-align: center; padding: 2rem 1rem 1rem; }
+  .winner-crown { font-size: 3rem; margin-bottom: 1rem; filter: grayscale(1); }
+  .winner-name { font-size: 2rem; color: #fff; font-family: 'Share Tech Mono', monospace; animation: glitch1 3s infinite; }
+  .winner-label { font-size: 0.6rem; letter-spacing: 0.3rem; color: #d2d2d2; text-transform: uppercase; margin-bottom: 0.5rem; font-family: 'Share Tech Mono', monospace; }
+  .winner-result { text-align: center; padding: 1.5rem 0 1rem; border-bottom: 1px solid #111; margin-bottom: 1rem; }
+  .winner-result-name { font-size: 1.6rem; color: #fff; font-family: 'Share Tech Mono', monospace; }
+  .winner-result-label { font-size: 0.6rem; letter-spacing: 0.2rem; color: #787878; text-transform: uppercase; margin-bottom: 0.25rem; font-family: 'Share Tech Mono', monospace; }
+
+  /* ===== FAQ ===== */
+  .faq-item { border-bottom: 1px solid #222; }
+  .faq-item:last-child { border-bottom: none; }
+  .faq-question { width: 100%; background: none; border: none; text-align: left; cursor: pointer; padding: 1rem 0; display: flex; justify-content: space-between; align-items: center; gap: 1rem; color: #d2d2d2; font-family: 'Share Tech Mono', monospace; font-size: 0.85rem; transition: color 0.2s; }
+  .faq-question::before { content: '> '; color: #bebebe; }
+  .faq-question:hover { color: #fff; font-weight: 400; }
+  .faq-arrow { color: #fff; font-size: 0.7rem; transition: transform 0.25s; flex-shrink: 0; opacity: 0.4; }
+  .faq-item.open .faq-arrow { transform: rotate(90deg); opacity: 1; }
+  .faq-answer { max-height: 0; overflow: hidden; transition: max-height 0.4s ease; font-size: 0.82rem; color: #ccc; line-height: 1.8; font-family: 'Share Tech Mono', monospace; }
+  .faq-item.open .faq-answer { max-height: 1000px; }
+  .faq-answer-inner { padding: 0 0 1rem 1rem; }
+
+  /* ===== ADMIN TABS ===== */
+  .admin-tabs { display: flex; gap: 2px; margin-bottom: 1.25rem; background: #0a0a0a; border: 1px solid #777; border-radius: 0; padding: 3px; }
+  .admin-tab { flex: 1; padding: 0.6rem 0.25rem; font-family: 'Share Tech Mono', monospace; font-size: 0.6rem; letter-spacing: 0.08rem; text-transform: uppercase; cursor: pointer; border: none; border-radius: 0; background: transparent; color: #787878; transition: all 0.15s; }
+  .admin-tab:hover { color: #d2d2d2; }
+  .admin-tab.active { background: rgba(255,255,255,0.06); color: #fff; border: 1px solid #888; text-shadow: 0 0 10px rgba(255,255,255,0.4); background: rgba(255,255,255,0.1); }
+  .admin-tab-content { display: none; }
+  .admin-tab-content.active { display: block; animation: fadeIn 0.2s ease; }
+
+  /* ===== CHAIN ===== */
+  .chain-wrap { overflow-x: auto; padding: 0.5rem 0; }
+  .chain-list { display: flex; align-items: center; flex-wrap: wrap; gap: 4px; }
+  .chain-player { display: flex; align-items: center; gap: 4px; }
+  .chain-name { background: rgba(255,255,255,0.03); border: 1px solid #222; border-radius: 0; padding: 6px 12px; font-size: 0.75rem; color: #d2d2d2; white-space: nowrap; font-family: 'Share Tech Mono', monospace; }
+  .chain-name.dead { background: transparent; border-color: #787878; color: #787878; text-decoration: line-through; }
+  .chain-arrow { color: #787878; font-size: 0.8rem; }
+
+  /* ===== LOBBY ===== */
+  .lobby-header { text-align: center; margin-bottom: 1.5rem; }
+  .lobby-count { font-size: 3.5rem; color: #fff; line-height: 1; font-family: 'Share Tech Mono', monospace; }
+  .lobby-count-label { font-size: 0.6rem; letter-spacing: 0.25rem; color: #a0a0a0; text-transform: uppercase; margin-top: 0.25rem; font-family: 'Share Tech Mono', monospace; }
+  .lobby-list { list-style: none; margin-bottom: 1rem; }
+  .lobby-item { display: flex; align-items: center; gap: 0.75rem; padding: 0.65rem 0; border-bottom: 1px solid #222; animation: fadeIn 0.3s ease; }
+  .lobby-item:last-child { border-bottom: none; }
+  .lobby-index { font-size: 0.6rem; color: #a0a0a0; min-width: 1.5rem; font-family: 'Share Tech Mono', monospace; }
+  .lobby-name { font-size: 0.9rem; color: #fff; flex: 1; font-family: 'Share Tech Mono', monospace; }
+  .lobby-joined { font-size: 0.6rem; color: #a0a0a0; font-family: 'Share Tech Mono', monospace; }
+  .lobby-dot { width: 6px; height: 6px; border-radius: 50%; background: #fff; box-shadow: 0 0 6px rgba(255,255,255,0.4); animation: pulse 2s ease-in-out infinite; flex-shrink: 0; }
+  .qr-box { text-align: center; padding: 1.5rem; border: 1px solid #777; border-radius: 0; margin-bottom: 1rem; background: rgba(255,255,255,0.01); }
+  .qr-box canvas, .qr-box img { margin: 0 auto; display: block; }
+  .qr-label { font-size: 0.6rem; letter-spacing: 0.2rem; color: #a0a0a0; text-transform: uppercase; margin-top: 0.75rem; font-family: 'Share Tech Mono', monospace; }
+  .qr-url { font-size: 0.65rem; color: #a0a0a0; margin-top: 0.25rem; word-break: break-all; font-family: 'Share Tech Mono', monospace; }
+
+  /* ===== FOOTER ===== */
+  .page-footer { text-align: center; padding: 3rem 0 2rem; border-top: 1px solid #111; margin-top: 3rem; }
+  .trask-logo { display: inline-flex; align-items: center; gap: 0.5rem; margin-bottom: 0.75rem; }
+  .trask-logo-text { font-size: 0.8rem; letter-spacing: 0.4rem; color: #787878; text-transform: uppercase; font-family: 'Share Tech Mono', monospace; }
+  .footer-dept { font-size: 0.58rem; letter-spacing: 0.2rem; color: #787878; text-transform: uppercase; margin-bottom: 0.4rem; font-family: 'Share Tech Mono', monospace; }
+  .footer-copyright { font-size: 0.55rem; color: #787878; letter-spacing: 0.1rem; font-family: 'Share Tech Mono', monospace; }
+
+  /* ===== PLAYER LIST ===== */
+  .player-list { list-style: none; }
+  .player-item { display: flex; align-items: center; justify-content: space-between; padding: 0.75rem 0; border-bottom: 1px solid #111; }
+  .player-item:last-child { border-bottom: none; }
+  .player-name { font-size: 0.9rem; color: #ccc; font-family: 'Share Tech Mono', monospace; }
+  .player-meta { font-size: 0.68rem; color: #bebebe; margin-top: 2px; }
+  .player-weapon { font-size: 0.68rem; color: #d2d2d2; font-style: italic; text-align: right; max-width: 140px; }
+
+  .section-title { font-size: 0.9rem; color: #d2d2d2; margin-bottom: 1rem; font-family: 'Share Tech Mono', monospace; }
+  .empty-state { text-align: center; color: #a0a0a0; font-size: 0.78rem; padding: 2rem; font-family: 'Share Tech Mono', monospace; }
+
+  @keyframes entryBlink {
+    0%   { color:#ff2222; border-color:#ff2222; text-shadow:0 0 10px rgba(255,34,34,0.4); }
+    50%  { color:#ff8888; border-color:#ff8888; text-shadow:0 0 30px rgba(255,34,34,0.9), 0 0 60px rgba(255,34,34,0.4); }
+    100% { color:#ff2222; border-color:#ff2222; text-shadow:0 0 10px rgba(255,34,34,0.4); }
+  }
+  </style>
+</head>
+<body>
+
+<canvas id="bg-canvas"></canvas>
+
+<div class="container">
+
+  <div class="header">
+    <div class="header-ornament" id="header-motto">WE ARE TESTERS.</div>
+
+
+
+    <h1 data-text="Hra na Vrahy">Hra na Vrahy</h1>
+    <div class="header-sub">// we will find your bugs //</div>
+  </div>
+
+  <!-- MAIN PANEL -->
+  <div id="panel-register" class="panel active">
+
+    <div class="warning-banner">
+      UNAUTHORIZED BUG DETECTED — proceed at own risk
+    </div>
+
+    <div class="countdown-box visible" id="countdown-box">
+      <div class="countdown-label">☣ PROTOKOL AKTIVNÍ — čas do spuštění</div>
+      <div class="countdown-inner">
+        <div class="countdown-unit">
+          <div class="countdown-seg" id="countdown-dd">00</div>
+          <div class="countdown-unit-label">DD</div>
+        </div>
+        <div class="countdown-sep">:</div>
+        <div class="countdown-unit">
+          <div class="countdown-seg" id="countdown-hh">00</div>
+          <div class="countdown-unit-label">HH</div>
+        </div>
+        <div class="countdown-sep">:</div>
+        <div class="countdown-unit">
+          <div class="countdown-seg" id="countdown-mm">00</div>
+          <div class="countdown-unit-label">MM</div>
+        </div>
+        <div class="countdown-sep">:</div>
+        <div class="countdown-unit">
+          <div class="countdown-seg" id="countdown-ss">00</div>
+          <div class="countdown-unit-label">SS</div>
+        </div>
+        <div class="countdown-sep countdown-sep-ms">.</div>
+        <div class="countdown-unit">
+          <div class="countdown-seg countdown-seg-ms" id="countdown-ms">000</div>
+          <div class="countdown-unit-label">MS</div>
+        </div>
+      </div>
+      <div class="countdown-sub">20. 6. 2026 — 18:00 — Klínovec</div>
+    </div>
+
+    <div id="entry-wrap" style="display:none;text-align:center;margin:1.5rem 0 0.5rem;">
+      <a href="https://johnyfolki.github.io/hra-na-vrahy/" style="
+        display:inline-block;
+        padding:1.2rem 3rem;
+        background:transparent;
+        border:2px solid #ff2222;
+        color:#ff2222;
+        font-family:'Bebas Neue',sans-serif;
+        font-size:2rem;
+        letter-spacing:0.6rem;
+        text-transform:uppercase;
+        text-decoration:none;
+        font-weight:700;
+        animation:entryBlink 1.4s ease-in-out infinite;
+      ">[ ENTER GAME ]</a>
+    </div>
+
+    <div class="footer-nav" style="display:flex;justify-content:center;gap:1.5rem;">
+      <a onclick="showPanel('panel-rules')">[RULES]</a>
+      <a onclick="showPanel('panel-faq')">[FAQ]</a>
+    </div>
+  </div>
+
+  <!-- ===== PANEL: PRAVIDLA ===== -->
+  <div id="panel-rules" class="panel">
+    <div class="card">
+      <div class="card-title">Pravidla hry</div>
+
+      <div style="margin-bottom:2rem;">
+        <p style="font-size:0.6rem; letter-spacing:0.2rem; color:#666; text-transform:uppercase; margin-bottom:0.75rem; text-shadow:0 0 6px rgba(100,160,50,0.4);">// Cíl hry</p>
+        <p style="font-size:0.85rem; color:#555; line-height:1.8; font-family:'Share Tech Mono',monospace;">
+          Eliminuj všechny ostatní hráče a staň se posledním přeživším. Hra probíhá nepřetržitě — klidně přes noc až do druhého dne — dokud nezůstane jen jeden.
+        </p>
+      </div>
+
+      <div style="margin-bottom:2rem;">
+        <p style="font-size:0.6rem; letter-spacing:0.2rem; color:#666; text-transform:uppercase; margin-bottom:0.75rem; text-shadow:0 0 6px rgba(100,160,50,0.4);">// Začátek hry</p>
+        <p style="font-size:0.85rem; color:#555; line-height:1.8; font-family:'Share Tech Mono',monospace;">
+          Každý hráč se zaregistruje na této stránce — zadá své jméno, email a vymyslí svoji <span style="color:#999;">vražednou zbraň</span> (libovolný předmět v dosahu, např. tužka, vidlička, kelímek). Jakmile admin spustí losování, každý obdrží email se svým <span style="color:#bbb;">cílem</span> a <span style="color:#999;">zbraní</span>. Od okamžiku doručení emailu hra začíná.
+        </p>
+      </div>
+
+      <div style="margin-bottom:2rem;">
+        <p style="font-size:0.6rem; letter-spacing:0.2rem; color:#666; text-transform:uppercase; margin-bottom:0.75rem; text-shadow:0 0 6px rgba(100,160,50,0.4);">// Jak eliminovat</p>
+        <p style="font-size:0.85rem; color:#555; line-height:1.8; font-family:'Share Tech Mono',monospace;">
+          Dotkni se svého cíle přidělenou zbraní. Zásah musí být <span style="color:#bbb;">nepozorovaný</span> — nesmí vás u toho vidět žádný jiný hráč. Pokud vás někdo vidí, vražda neplatí a hra pokračuje.
+        </p>
+      </div>
+
+      <div style="margin-bottom:2rem;">
+        <p style="font-size:0.6rem; letter-spacing:0.2rem; color:#666; text-transform:uppercase; margin-bottom:0.75rem; text-shadow:0 0 6px rgba(100,160,50,0.4);">// Po úspěšné eliminaci</p>
+        <p style="font-size:0.85rem; color:#555; line-height:1.8; font-family:'Share Tech Mono',monospace;">
+          Zasažený hráč musí zásah uznat jako platný a kliknout na odkaz <span style="color:#999;">[ POTVRDIT VLASTNÍ SMRT ]</span> ve svém emailu. Tím systém automaticky přepošle vrahovi nový cíl a novou zbraň.
+        </p>
+      </div>
+
+      <div style="margin-bottom:2rem;">
+        <p style="font-size:0.6rem; letter-spacing:0.2rem; color:#666; text-transform:uppercase; margin-bottom:0.75rem; text-shadow:0 0 6px rgba(100,160,50,0.4);">// Bezpečné zóny</p>
+        <p style="font-size:0.85rem; color:#555; line-height:1.8; font-family:'Share Tech Mono',monospace;">
+          Jediná bezpečná zóna jsou <span style="color:#bbb;">záchody</span>. Kdekoliv jinde — uvnitř i venku — jsi v ohrožení. Ani spánek tě nezachrání.
+        </p>
+      </div>
+
+      <div style="margin-bottom:2rem;">
+        <p style="font-size:0.6rem; letter-spacing:0.2rem; color:#666; text-transform:uppercase; margin-bottom:0.75rem; text-shadow:0 0 6px rgba(100,160,50,0.4);">// Spory a sporné situace</p>
+        <p style="font-size:0.85rem; color:#555; line-height:1.8; font-family:'Share Tech Mono',monospace;">
+          Pokud hráč odmítá uznat platný zásah nebo panuje spor, rozhoduje <span style="color:#bbb;">admin hry</span>. Jeho rozhodnutí je konečné. Admin má také právo hráče ručně eliminovat.
+        </p>
+      </div>
+
+      <div style="margin-bottom:2rem;">
+        <p style="font-size:0.6rem; letter-spacing:0.2rem; color:#666; text-transform:uppercase; margin-bottom:0.75rem; text-shadow:0 0 6px rgba(100,160,50,0.4);">// Vítěz</p>
+        <p style="font-size:0.85rem; color:#555; line-height:1.8; font-family:'Share Tech Mono',monospace;">
+          Hráč který eliminuje posledního soupeře a jehož cílem by byl on sám — vyhrává. Systém automaticky detekuje vítěze a oznámí ho všem.
+        </p>
+      </div>
+
+      <div style="background:rgba(200,40,20,0.06); border:1px solid rgba(200,40,20,0.2); border-left:3px solid #c83010; border-radius:1px; padding:1.25rem;">
+        <p style="font-size:0.6rem; letter-spacing:0.2rem; color:#999; text-transform:uppercase; margin-bottom:0.5rem; font-family:'Share Tech Mono',monospace;">⚠ Pamatuj</p>
+        <p style="font-size:0.82rem; color:#555; line-height:1.8; margin:0; font-family:'Share Tech Mono',monospace;">
+          Nikdo neví kdo je jeho vrah. Každý sleduje svůj cíl — a zároveň se musí mít na pozoru. Důvěřuj komukoliv na vlastní riziko.
+        </p>
+      </div>
+
+    </div>
+    <div class="footer-nav">
+      <a onclick="showPanel('panel-register')">← Zpět</a>
+    </div>
+  </div>
+
+  <!-- ===== PANEL: FAQ ===== -->
+  <div id="panel-faq" class="panel">
+    <div class="card">
+      <div class="card-title">— Často kladené otázky —</div>
+
+      <div class="faq-item">
+        <button class="faq-question" onclick="toggleFaq(this)">
+          Jak se do hry registrovat?
+          <span class="faq-arrow">▼</span>
+        </button>
+        <div class="faq-answer">Po skončení odpočtu se zobrazí možnost registrace. Na teambuildingu bude dostatek času na provedení registrace.</div>
+      </div>
+      <div class="faq-item">
+        <button class="faq-question" onclick="toggleFaq(this)">
+          Jak poznám svůj cíl a zbraň?
+          <span class="faq-arrow">▶</span>
+        </button>
+        <div class="faq-answer"><div class="faq-answer-inner">
+          Po losování ti přijde email s přiděleným cílem a zbraní. Zbraň ti losování přidělí náhodně — je to zbraň jednoho z ostatních hráčů. Tvůj aktuální cíl a zbraň jsou vždy v posledním emailu, který ti hra poslala.
+        </div></div>
+      </div>
+
+      <div class="faq-item">
+        <button class="faq-question" onclick="toggleFaq(this)">
+          Jak se eliminuje?
+          <span class="faq-arrow">▶</span>
+        </button>
+        <div class="faq-answer"><div class="faq-answer-inner">
+          Dotkni se svého cíle přidělenou zbraní — ale nesmí tě u toho vidět žádný jiný hráč. Pokud tě někdo vidí, vražda neplatí a hra pokračuje.
+        </div></div>
+      </div>
+
+      <div class="faq-item">
+        <button class="faq-question" onclick="toggleFaq(this)">
+          Co se stane po úspěšné eliminaci?
+          <span class="faq-arrow">▶</span>
+        </button>
+        <div class="faq-answer"><div class="faq-answer-inner">
+          Zasažený hráč musí potvrdit svoji smrt přes odkaz v emailu. Tím systém automaticky přepošle vrahovi nový cíl a zbraň — přebírá cíl eliminovaného hráče.
+        </div></div>
+      </div>
+
+      <div class="faq-item">
+        <button class="faq-question" onclick="toggleFaq(this)">
+          Může mě eliminovat kdokoli, nebo jen můj vrah?
+          <span class="faq-arrow">▶</span>
+        </button>
+        <div class="faq-answer"><div class="faq-answer-inner">
+          Jen ten, kdo má email s tvým jménem jako cílem. Ostatní hráči tě eliminovat nemohou — i kdyby chtěli.
+        </div></div>
+      </div>
+
+      <div class="faq-item">
+        <button class="faq-question" onclick="toggleFaq(this)">
+          Co když mě při vraždě vidí další osoba?
+          <span class="faq-arrow">▶</span>
+        </button>
+        <div class="faq-answer"><div class="faq-answer-inner">
+          Vražda neplatí, hra dál pokračuje. Tvůj cíl ale teď ví, že ho máš zabít — a o to složitější to budeš mít.
+        </div></div>
+      </div>
+
+      <div class="faq-item">
+        <button class="faq-question" onclick="toggleFaq(this)">
+          Co když někdo odmítá uznat zásah?
+          <span class="faq-arrow">▶</span>
+        </button>
+        <div class="faq-answer"><div class="faq-answer-inner">
+          Rozhodnutí udělá správce hry — společně ho kontaktujte. Jeho rozhodnutí je konečné.
+        </div></div>
+      </div>
+
+      <div class="faq-item">
+        <button class="faq-question" onclick="toggleFaq(this)">
+          Co když už nechci ve hře pokračovat?
+          <span class="faq-arrow">▶</span>
+        </button>
+        <div class="faq-answer"><div class="faq-answer-inner">
+          Spáchej „sebevraždu" — v emailu klikni na odkaz „Potvrdit vlastní smrt" jako by tě někdo zasáhl. Tvůj cíl bude automaticky přeposlán tvému vrahovi, nikdo se nic nedozví a hra plynule pokračuje bez tebe.
+        </div></div>
+      </div>
+
+      <div class="faq-item">
+        <button class="faq-question" onclick="toggleFaq(this)">
+          Co když omylem kliknu na „Potvrdit vlastní smrt"?
+          <span class="faq-arrow">▶</span>
+        </button>
+        <div class="faq-answer"><div class="faq-answer-inner">
+          Kontaktuj ihned admina — může provést ruční korekci v admin panelu. Proto před kliknutím vždy potvrď že byl zásah skutečně platný.
+        </div></div>
+      </div>
+
+      <div class="faq-item">
+        <button class="faq-question" onclick="toggleFaq(this)">
+          Jsou místa, kde nemůžu být zabit?
+          <span class="faq-arrow">▶</span>
+        </button>
+        <div class="faq-answer"><div class="faq-answer-inner">
+          Ano — záchody jsou jediná bezpečná zóna. Kdekoliv jinde jsi v ohrožení. Ani spánek tě nezachrání.
+        </div></div>
+      </div>
+
+      <div class="faq-item">
+        <button class="faq-question" onclick="toggleFaq(this)">
+          Mohu se spojit s ostatními hráči?
+          <span class="faq-arrow">▶</span>
+        </button>
+        <div class="faq-answer"><div class="faq-answer-inner">
+          Ano — aliance, dezinformace, alibi. Vše je povoleno. Pamatuj ale že každý hraje sám za sebe a tvůj nejlepší přítel může být tvůj vrah.
+        </div></div>
+      </div>
+
+      <div class="faq-item">
+        <button class="faq-question" onclick="toggleFaq(this)">
+          Co když omylem vyzradím svůj cíl?
+          <span class="faq-arrow">▶</span>
+        </button>
+        <div class="faq-answer"><div class="faq-answer-inner">
+          Smůla. Email a cíl jsou přísně tajné — nikomu je neukazuj. Pokud tvůj cíl zjistí že ho sleduješ, bude opatrnější a eliminace bude těžší.
+        </div></div>
+      </div>
+
+      <div class="faq-item">
+        <button class="faq-question" onclick="toggleFaq(this)">
+          Nedostal jsem email — co teď?
+          <span class="faq-arrow">▶</span>
+        </button>
+        <div class="faq-answer"><div class="faq-answer-inner">
+          Zkontroluj spam. Pokud tam také není, kontaktuj správce hry — může ti email znovu odeslat z admin panelu.
+        </div></div>
+      </div>
+
+      <div class="faq-item">
+        <button class="faq-question" onclick="toggleFaq(this)">
+          Jak poznám že jsem vyhrál?
+          <span class="faq-arrow">▶</span>
+        </button>
+        <div class="faq-answer"><div class="faq-answer-inner">
+          Systém to detekuje automaticky — když eliminuješ posledního soupeře, dostaneš email s gratulací a na webu se zobrazí vítězná obrazovka s tvým jménem.
+        </div></div>
+      </div>
+
+      <div class="faq-item">
+        <button class="faq-question" onclick="toggleFaq(this)">
+          Jak webovka funguje?
+          <span class="faq-arrow">▶</span>
+        </button>
+        <div class="faq-answer"><div class="faq-answer-inner" style="font-size:0.82rem; line-height:1.8;">
+          <p style="margin:0 0 0.75rem;">Webová aplikace běží zdarma na <span style="color:#ccc;">GitHub Pages</span> a využívá tři služby:</p>
+          <p style="margin:0 0 0.4rem; color:#555;">📦 Firebase Firestore</p>
+          <p style="margin:0 0 0.75rem;">Databáze v reálném čase. Ukládá hráče, přiřazené cíle, zbraně a historii eliminací. Aktualizuje se okamžitě na všech zařízeních.</p>
+          <p style="margin:0 0 0.4rem; color:#555;">📧 EmailJS</p>
+          <p style="margin:0 0 0.75rem;">Odesílání emailů přímo z prohlížeče bez vlastního serveru. Při losování každý dostane email s cílem a zbraní. Po každé eliminaci vrah automaticky dostane nový cíl.</p>
+          <p style="margin:0 0 0.4rem; color:#555;">🔗 Kill linky</p>
+          <p style="margin:0 0 0.75rem;">Každý hráč má v emailu unikátní odkaz. Po kliknutí systém ověří token, označí hráče za mrtvého a přepošle jeho cíl vrahovi.</p>
+          <p style="margin:0 0 0.4rem; color:#555;">⚙️ Admin panel</p>
+          <p style="margin:0;">Chráněný heslem. Spouští losování, sleduje stav hry, nastavuje odpočet, umožňuje ruční eliminaci a zobrazuje výsledky s časovou osou.</p>
+        </div></div>
+      </div>
+
+    </div>
+    <div class="footer-nav" style="margin-top:1rem;">
+      <a onclick="hideFaq()">← Zpět</a>
+    </div>
+  </div>
+
+</div>
+
+<!-- GEO DATA -->
+<script>
+const GEO_COUNTRIES = [{"n":"Fiji","p":[[[180,-16.07],[179.36,-16.8],[178.6,-16.64],[179.41,-16.38]],[[178.13,-17.5],[178.72,-17.63],[177.93,-18.29],[177.29,-17.72],[178.13,-17.5]]]},{"n":"Tanzania","p":[[[33.9,-0.95],[37.7,-3.1],[39.2,-4.68],[38.8,-6.48],[39.47,-7.1],[39.25,-8.01],[39.54,-9.11],[40.32,-10.32],[39.52,-10.9],[37.83,-11.27],[36.78,-11.59],[35.31,-11.44],[34.28,-10.16],[33.74,-9.42],[32.19,-8.93],[31.16,-8.59],[30.74,-8.34],[29.62,-6.52],[29.52,-5.42],[29.75,-4.45],[30.51,-3.57],[30.74,-3.03],[30.47,-2.41],[30.76,-2.29],[30.42,-1.13],[31.87,-1.03]]]},{"n":"W. Sahara","p":[[[-8.67,27.66],[-8.68,27.4],[-11.97,25.93],[-12.87,23.28],[-12.93,21.33],[-17.06,21.0],[-17.0,21.42],[-14.63,21.86],[-13.89,23.69],[-12.03,26.03],[-11.39,26.88],[-10.19,26.86],[-9.41,27.09],[-8.82,27.66]]]},{"n":"Canada","p":[[[-122.84,49],[-124.91,49.98],[-127.44,50.83],[-127.85,52.33],[-129.31,53.56],[-130.54,54.8],[-129.98,55.28],[-131.71,56.55],[-133.36,58.41],[-134.94,59.27],[-136.48,59.46],[-138.34,59.56],[-140.01,60.28],[-140.99,66.0],[-140.99,69.71],[-137.55,68.99],[-135.63,69.32],[-132.93,69.51],[-129.79,70.19],[-128.36,70.01],[-127.45,70.38],[-124.42,70.16],[-123.06,69.56],[-121.47,69.8],[-117.6,69.01],[-115.25,68.91],[-115.3,67.9],[-110.8,67.81],[-108.88,67.38],[-108.81,68.31],[-106.95,68.7],[-105.34,68.56],[-103.22,68.1],[-99.9,67.81],[-98.56,68.4],[-96.12,68.24],[-95.49,68.09],[-94.23,69.07],[-96.47,70.09],[-95.21,71.92],[-92.88,71.32],[-92.41,69.7],[-90.55,68.47],[-88.02,68.62],[-87.35,67.2],[-85.58,68.78],[-84.1,69.81],[-81.28,69.16],[-81.96,68.13],[-81.39,67.11],[-84.74,66.26],[-86.07,66.06],[-87.32,64.78],[-89.91,64.03],[-90.77,62.96],[-93.16,62.02],[-94.63,60.11],[-93.22,58.78],[-92.3,57.09],[-89.04,56.85],[-87.32,56.0],[-85.01,55.3],[-82.27,55.15],[-82.13,53.28],[-79.91,51.21],[-78.6,52.56],[-79.83,54.67],[-77.1,55.84],[-76.62,57.2],[-78.52,58.8],[-77.77,60.76],[-77.41,62.55],[-74.67,62.18],[-72.91,62.11],[-71.37,61.14],[-69.62,60.22],[-68.37,58.8],[-66.2,58.77],[-64.58,60.34],[-62.5,58.17],[-61.8,56.34],[-59.57,55.2],[-57.33,54.63],[-56.16,53.65],[-55.68,52.15],[-57.13,51.42],[-60.03,50.24],[-63.86,50.29],[-66.4,50.23],[-68.51,49.07],[-71.1,46.82],[-68.65,48.3],[-65.06,49.23],[-65.12,48.07],[-64.47,46.24],[-61.52,45.88],[-60.45,46.28],[-61.04,45.27],[-64.25,44.27],[-66.12,43.62],[-64.43,45.29],[-67.14,45.14],[-67.79,47.07],[-68.91,47.19],[-70.0,46.69],[-70.66,45.46],[-71.41,45.26],[-73.35,45.01],[-75.32,44.82],[-76.5,44.02],[-77.74,43.63],[-79.17,43.47],[-78.92,42.97],[-80.25,42.37],[-82.44,41.68],[-83.03,41.83],[-83.12,42.08],[-82.43,42.98],[-82.34,44.44],[-83.59,45.82],[-83.62,46.12],[-84.09,46.28],[-84.34,46.41],[-84.54,46.54],[-84.88,46.9],[-86.46,47.55],[-88.38,48.3],[-89.6,48.01],[-91.64,48.14],[-93.63,48.61],[-94.64,48.84],[-95.16,49.38],[-97.23,49.0],[-104.05,49.0],[-110.05,49],[-116.05,49],[-120,49]],[[-83.99,62.45],[-81.88,62.9],[-83.07,62.16],[-83.99,62.45]],[[-79.78,72.8],[-80.83,73.69],[-78.06,73.65],[-76.25,72.83],[-78.39,72.88],[-79.78,72.8]],[[-80.32,62.09],[-79.52,62.36],[-79.66,61.63],[-80.36,62.02]],[[-93.61,74.98],[-95.61,74.67],[-96.29,75.38],[-93.98,75.3]],[[-93.84,77.52],[-96.17,77.56],[-94.42,77.82],[-93.84,77.52]],[[-96.75,78.77],[-95.83,78.06],[-98.12,78.08],[-98.63,78.87],[-96.75,78.77]],[[-88.15,74.39],[-92.42,74.84],[-92.89,75.88],[-95.96,76.44],[-96.75,77.16],[-93.57,76.78],[-90.74,76.45],[-89.82,75.85],[-87.84,75.57],[-84.79,75.7],[-81.13,75.71],[-79.83,74.92],[-81.95,74.44],[-86.1,74.41]],[[-111.26,78.15],[-110.19,77.7],[-113.53,77.73],[-111.26,78.15]],[[-110.96,78.8],[-110.88,78.41],[-112.53,78.55],[-110.96,78.8]],[[-55.6,51.32],[-56.8,49.81],[-55.47,49.94],[-54.94,49.31],[-53.48,49.25],[-53.09,48.69],[-52.65,47.54],[-53.52,46.62],[-53.96,47.63],[-55.4,46.88],[-55.29,47.39],[-57.33,47.57],[-59.42,47.9],[-59.23,48.52],[-57.36,50.72],[-55.87,51.63],[-55.6,51.32]],[[-83.88,65.11],[-81.64,64.46],[-80.82,64.06],[-80.99,63.41],[-83.11,64.1],[-85.52,63.05],[-87.22,63.54],[-86.22,64.82],[-85.16,65.66],[-84.46,65.37]],[[-78.77,72.35],[-75.61,72.24],[-74.1,71.33],[-71.2,70.92],[-67.91,70.12],[-68.81,68.72],[-64.86,67.85],[-61.85,66.86],[-63.92,65.0],[-66.72,66.39],[-68.14,65.69],[-65.73,64.65],[-64.67,63.39],[-66.28,62.95],[-67.37,62.88],[-66.17,61.93],[-71.02,62.91],[-71.89,63.68],[-74.83,64.68],[-77.71,64.23],[-77.9,65.31],[-73.96,65.45],[-73.94,66.31],[-72.93,67.73],[-74.84,68.55],[-76.23,69.15],[-78.17,69.83],[-79.49,69.87],[-84.94,69.97],[-88.68,70.41],[-88.47,71.22],[-90.21,72.24],[-88.41,73.54],[-86.56,73.16],[-84.85,73.34],[-80.6,72.72],[-78.77,72.35]],[[-94.5,74.13],[-90.51,73.86],[-93.2,72.77],[-95.41,72.06],[-96.02,73.44],[-94.5,74.13]],[[-122.85,76.12],[-121.16,76.86],[-117.57,77.5],[-116.34,76.88],[-118.04,76.48],[-121.5,75.9]],[[-132.71,54.04],[-132.05,52.98],[-131.58,52.18],[-132.55,53.1],[-133.24,53.85],[-132.71,54.04]],[[-105.49,79.3],[-100.83,78.8],[-99.67,77.91],[-102.95,78.34],[-104.21,78.68],[-105.49,79.3]],[[-123.51,48.51],[-125.66,48.83],[-126.85,49.53],[-128.06,49.99],[-128.36,50.77],[-126.7,50.4],[-125.42,49.95],[-123.92,49.06]],[[-121.54,74.45],[-117.56,74.19],[-115.51,73.48],[-119.22,72.52],[-120.46,71.38],[-123.62,71.34],[-125.5,72.29],[-123.94,73.68],[-121.54,74.45]],[[-107.82,75.85],[-105.88,75.97],[-106.31,75.01],[-112.22,74.42],[-113.87,74.72],[-116.31,75.04],[-116.35,76.2],[-112.59,76.14],[-109.07,75.47],[-109.58,76.79],[-108.21,76.2]],[[-106.52,73.08],[-104.77,71.7],[-102.79,70.5],[-101.09,69.58],[-102.09,69.12],[-104.24,68.91],[-107.12,69.12],[-111.53,68.63],[-113.85,69.01],[-116.11,69.17],[-116.67,70.07],[-113.72,70.19],[-114.35,70.6],[-117.9,70.54],[-116.11,71.31],[-119.4,71.56],[-117.87,72.71],[-114.17,73.12],[-112.44,72.96],[-109.92,72.96],[-108.19,71.65],[-108.4,73.09],[-106.52,73.08]],[[-100.44,72.71],[-100.36,73.84],[-97.38,73.76],[-98.05,72.99],[-96.72,71.66],[-99.32,71.36],[-102.5,72.51],[-100.44,72.71]],[[-98.5,76.72],[-97.7,75.74],[-99.81,74.9],[-100.86,75.64],[-102.57,76.34],[-99.98,76.65],[-98.5,76.72]],[[-96.02,80.6],[-94.3,80.98],[-92.41,81.26],[-89.45,80.51],[-87.02,79.66],[-87.19,79.04],[-90.8,78.22],[-93.95,78.75],[-93.15,79.38],[-96.08,79.71],[-96.02,80.6]],[[-91.59,81.89],[-88.93,82.12],[-85.5,82.65],[-83.18,82.32],[-81.1,83.02],[-76.25,83.17],[-72.83,83.23],[-68.5,83.11],[-63.68,82.9],[-61.89,82.36],[-66.75,81.73],[-65.48,81.51],[-69.47,80.62],[-73.24,79.63],[-76.91,79.32],[-76.22,79.02],[-76.34,78.18],[-78.36,77.51],[-79.62,76.98],[-77.89,76.78],[-83.17,76.45],[-87.6,76.42],[-89.62,76.95],[-88.26,77.9],[-84.98,77.54],[-87.96,78.37],[-85.38,79.0],[-86.51,79.74],[-84.2,80.21],[-81.85,80.46],[-87.6,80.52],[-90.2,81.26],[-91.59,81.89]],[[-75.22,67.44],[-76.99,67.1],[-76.81,68.15],[-75.11,68.01],[-75.22,67.44]],[[-96.26,69.49],[-96.27,68.76],[-98.43,68.95],[-98.92,69.71],[-97.16,69.86],[-96.26,69.49]],[[-64.52,49.87],[-62.86,49.71],[-61.81,49.11],[-63.59,49.4]],[[-64.01,47.04],[-62.94,46.42],[-62.5,46.03],[-64.14,46.39],[-64.01,47.04]]]},{"n":"United States of America","p":[[[-122.84,49],[-117.03,49],[-113,49],[-107.05,49],[-100.65,49],[-95.16,49],[-94.82,49.39],[-94.33,48.67],[-92.61,48.45],[-90.83,48.27],[-89.27,48.02],[-87.44,47.94],[-85.65,47.22],[-84.78,46.64],[-84.6,46.44],[-84.14,46.51],[-83.89,46.12],[-83.47,45.99],[-82.55,45.35],[-82.14,43.57],[-82.9,42.43],[-83.14,41.98],[-82.69,41.68],[-81.28,42.21],[-78.94,42.86],[-79.01,43.27],[-78.72,43.63],[-76.82,43.63],[-76.38,44.1],[-74.87,45.0],[-71.51,45.01],[-71.08,45.31],[-70.31,45.91],[-69.24,47.45],[-68.23,47.35],[-67.79,45.7],[-66.96,44.81],[-69.06,43.98],[-70.65,43.09],[-70.83,42.34],[-70.08,41.78],[-69.88,41.92],[-70.64,41.48],[-71.86,41.32],[-72.88,41.22],[-72.24,41.12],[-73.34,40.63],[-73.95,40.75],[-73.96,40.43],[-74.91,38.94],[-75.2,39.25],[-75.32,38.96],[-75.06,38.4],[-75.94,37.22],[-75.72,37.94],[-76.35,39.15],[-76.33,38.08],[-76.3,37.92],[-75.97,36.9],[-75.73,35.55],[-77.4,34.51],[-78.55,33.86],[-79.2,33.16],[-80.86,32.03],[-81.49,30.73],[-80.98,29.18],[-80.53,28.04],[-80.09,26.21],[-80.38,25.21],[-81.17,25.2],[-81.71,25.87],[-82.71,27.5],[-82.65,28.55],[-83.71,29.94],[-85.11,29.64],[-85.77,30.15],[-87.53,30.27],[-89.18,30.32],[-89.41,29.89],[-89.22,29.29],[-89.78,29.31],[-90.88,29.15],[-92.5,29.55],[-93.85,29.71],[-95.6,28.74],[-97.14,27.83],[-97.38,26.69],[-97.14,25.87],[-98.24,26.06],[-99.3,26.84],[-100.11,28.11],[-100.96,29.38],[-102.48,29.76],[-103.94,29.27],[-104.71,30.12],[-105.63,31.08],[-106.51,31.75],[-108.24,31.34],[-111.02,31.33],[-114.81,32.53],[-115.99,32.61],[-117.3,33.05],[-118.41,33.74],[-119.08,34.08],[-120.37,34.45],[-120.74,35.16],[-122.55,37.55],[-122.95,38.11],[-123.87,39.77],[-124.18,41.14],[-124.53,42.77],[-124.02,44.62],[-124.08,46.86],[-124.69,48.18],[-123.12,48.04],[-122.34,47.36],[-122.84,49]],[[-155.4,20.08],[-155.06,19.86],[-154.83,19.45],[-155.54,19.08],[-155.94,19.06],[-156.07,19.7],[-155.85,19.98],[-155.86,20.27],[-155.4,20.08]],[[-156.0,20.76],[-156.41,20.57],[-156.7,20.86],[-156.61,21.01],[-156.0,20.76]],[[-158.03,21.72],[-157.65,21.32],[-157.78,21.28],[-158.25,21.54],[-158.03,21.72]],[[-159.37,22.21],[-159.46,21.88],[-159.75,22.14],[-159.37,22.21]],[[-166.47,60.38],[-165.58,59.91],[-166.85,59.94],[-166.47,60.38]],[[-153.23,57.97],[-152.14,57.59],[-154.01,56.73],[-154.67,57.46],[-153.23,57.97]],[[-140.99,69.71],[-140.99,66.0],[-140.01,60.28],[-138.34,59.56],[-136.48,59.46],[-134.94,59.27],[-133.36,58.41],[-131.71,56.55],[-129.98,55.28],[-130.54,54.8],[-131.09,55.18],[-132.25,56.37],[-134.08,58.12],[-136.63,58.21],[-139.87,59.54],[-142.57,60.08],[-145.93,60.46],[-148.22,60.67],[-148.57,59.91],[-150.61,59.37],[-151.86,59.74],[-150.35,61.03],[-151.9,60.73],[-154.02,59.35],[-154.23,58.15],[-156.31,57.42],[-158.12,56.46],[-159.6,55.57],[-161.22,55.36],[-163.07,54.69],[-164.94,54.57],[-162.87,55.35],[-160.56,56.01],[-158.68,57.02],[-157.72,57.57],[-157.04,58.92],[-158.52,58.79],[-159.71,58.93],[-160.36,59.07],[-161.97,58.67],[-161.87,59.63],[-163.82,59.8],[-165.35,60.51],[-166.12,61.5],[-164.92,62.63],[-163.75,63.22],[-162.26,63.54],[-160.77,63.77],[-161.52,64.4],[-161.39,64.78],[-162.76,64.34],[-164.96,64.45],[-166.85,65.09],[-166.71,66.09],[-163.65,66.58],[-161.68,66.12],[-163.72,67.12],[-165.39,68.04],[-166.2,68.88],[-163.17,69.37],[-161.91,70.33],[-159.04,70.89],[-156.58,71.36],[-154.34,70.7],[-152.21,70.83],[-150.74,70.43],[-147.61,70.21],[-144.92,69.99],[-142.07,69.85],[-140.99,69.71]],[[-171.73,63.78],[-170.49,63.69],[-168.69,63.3],[-169.53,62.98],[-170.67,63.38],[-171.79,63.41]]]},{"n":"Kazakhstan","p":[[[87.36,49.21],[85.77,48.46],[85.16,47.0],[82.46,45.54],[79.97,44.92],[80.18,42.92],[79.64,42.5],[77.66,42.96],[75.64,42.88],[73.65,43.09],[71.84,42.85],[70.96,42.27],[69.07,41.38],[68.26,40.66],[66.71,41.17],[66.02,41.99],[64.9,43.73],[62.01,43.5],[60.24,44.78],[58.5,45.59],[55.97,41.31],[54.76,42.04],[52.94,42.12],[52.45,42.03],[52.5,42.79],[50.89,44.03],[50.31,44.61],[51.32,45.25],[53.04,45.26],[53.04,46.85],[51.19,47.05],[49.1,46.4],[48.69,47.08],[47.32,47.72],[47.04,49.15],[47.55,50.45],[48.7,50.61],[52.33,51.72],[55.72,50.62],[58.36,51.06],[59.93,50.84],[61.59,51.27],[60.93,52.45],[61.7,52.98],[61.44,54.01],[65.67,54.6],[69.07,55.39],[71.18,54.13],[73.51,54.04],[74.38,53.55],[76.53,54.18],[80.04,50.86],[81.95,50.81],[83.94,50.89],[85.12,50.12],[86.83,49.83]]]},{"n":"Uzbekistan","p":[[[55.97,41.31],[58.5,45.59],[60.24,44.78],[62.01,43.5],[64.9,43.73],[66.02,41.99],[66.71,41.17],[68.26,40.66],[69.07,41.38],[70.96,42.27],[70.42,41.52],[71.87,41.39],[71.77,40.15],[70.6,40.22],[70.67,40.96],[69.01,40.09],[67.7,39.58],[68.18,38.9],[67.83,37.14],[66.52,37.36],[65.22,38.4],[63.52,39.36],[61.88,41.08],[60.47,41.22],[59.98,42.22],[57.79,42.17],[57.1,41.32]]]},{"n":"Papua New Guinea","p":[[[141.0,-2.6],[144.58,-3.86],[145.83,-4.88],[147.65,-6.08],[146.97,-6.72],[148.08,-8.04],[149.31,-9.07],[150.04,-9.68],[150.8,-10.29],[150.03,-10.65],[148.92,-10.28],[147.14,-9.49],[146.05,-8.07],[143.9,-7.92],[143.41,-8.98],[142.07,-9.16],[141.02,-5.86]],[[152.64,-3.66],[153.14,-4.5],[152.64,-4.18],[151.95,-3.46],[150.66,-2.74],[151.48,-2.78],[152.24,-3.24]],[[151.3,-5.84],[150.24,-6.32],[148.89,-6.03],[148.4,-5.44],[149.85,-5.51],[150.14,-5.0],[150.81,-5.46],[151.65,-4.76],[152.14,-4.15],[152.32,-4.87],[151.46,-5.56]],[[154.76,-5.34],[155.55,-6.2],[155.88,-6.82],[155.17,-6.54],[154.51,-5.14],[154.76,-5.34]]]},{"n":"Indonesia","p":[[[141.0,-2.6],[141.03,-9.12],[139.13,-8.1],[137.61,-8.41],[138.67,-7.32],[137.93,-5.39],[135.16,-4.46],[133.37,-4.02],[132.76,-3.75],[131.99,-2.82],[133.78,-2.48],[132.23,-2.21],[130.94,-1.43],[131.87,-0.7],[133.99,-0.78],[134.42,-2.77],[136.29,-2.31],[138.33,-1.7],[139.93,-2.41]],[[124.97,-8.89],[125.09,-9.39],[123.58,-10.36],[123.55,-9.9],[124.97,-8.89]],[[134.21,-6.9],[134.29,-5.78],[134.73,-5.74],[134.21,-6.9]],[[117.88,4.14],[118.05,2.29],[119.0,0.9],[117.48,0.1],[116.56,-1.49],[116.15,-4.01],[114.86,-4.11],[113.76,-3.44],[112.07,-3.48],[111.05,-3.05],[110.07,-1.59],[109.09,-0.46],[109.07,1.34],[109.83,1.34],[111.16,0.98],[112.38,1.41],[113.81,1.22],[115.13,2.82],[115.87,4.31],[117.88,4.14]],[[129.37,-2.8],[130.83,-3.86],[129.16,-3.36],[127.9,-3.39],[129.37,-2.8]],[[127.93,2.17],[128.59,1.54],[128.64,0.26],[127.97,-0.25],[128.1,-0.9],[127.4,1.01],[127.93,2.17]],[[122.93,0.88],[125.07,1.64],[124.44,0.43],[122.72,0.43],[120.18,0.24],[120.94,-1.41],[123.34,-0.62],[122.82,-0.93],[121.51,-1.9],[122.27,-3.53],[123.16,-5.34],[122.24,-5.28],[121.74,-4.85],[121.62,-4.19],[120.97,-2.63],[120.39,-4.1],[119.8,-5.67],[119.65,-4.46],[119.08,-3.49],[119.18,-2.15],[119.83,0.15],[120.89,1.31],[122.93,0.88]],[[120.3,-10.26],[119.9,-9.36],[120.78,-9.97],[120.3,-10.26]],[[121.34,-8.54],[122.9,-8.09],[121.25,-8.93],[119.92,-8.44],[121.34,-8.54]],[[118.26,-8.36],[119.13,-8.71],[117.28,-9.04],[117.08,-8.46],[117.9,-8.1]],[[108.49,-6.42],[110.54,-6.88],[112.61,-6.95],[114.48,-7.78],[114.56,-8.75],[112.56,-8.38],[110.59,-8.12],[108.69,-7.64],[106.45,-7.35],[105.37,-6.85],[107.27,-5.95],[108.49,-6.42]],[[104.37,-1.08],[104.89,-2.34],[106.11,-3.06],[105.82,-5.85],[103.87,-5.04],[102.16,-3.61],[100.9,-2.05],[99.26,0.18],[98.6,1.82],[97.18,3.31],[95.38,4.97],[95.94,5.44],[98.37,4.27],[99.69,3.17],[101.66,2.08],[103.08,0.56],[103.44,-0.71],[104.37,-1.08]]]},{"n":"Argentina","p":[[[-68.63,-52.64],[-67.75,-53.85],[-65.05,-54.7],[-66.45,-55.25],[-67.56,-54.87],[-68.63,-52.64]],[[-57.63,-30.22],[-58.14,-32.04],[-58.35,-33.26],[-58.5,-34.43],[-57.36,-35.98],[-56.79,-36.9],[-59.23,-38.72],[-62.34,-38.83],[-62.33,-40.17],[-62.75,-41.03],[-64.73,-40.8],[-64.98,-42.06],[-63.76,-42.04],[-64.38,-42.87],[-65.33,-44.5],[-66.51,-45.04],[-67.58,-46.3],[-65.64,-47.24],[-67.17,-48.7],[-68.73,-50.26],[-68.82,-51.77],[-68.57,-52.3],[-71.91,-52.01],[-72.31,-50.68],[-73.33,-50.38],[-72.65,-48.88],[-72.45,-47.74],[-71.55,-45.56],[-71.22,-44.78],[-71.79,-44.21],[-71.92,-43.41],[-71.75,-42.05],[-71.68,-39.81],[-70.81,-38.55],[-71.12,-36.66],[-70.39,-35.17],[-69.81,-33.27],[-70.54,-31.37],[-70.01,-29.37],[-69.0,-27.52],[-68.59,-26.51],[-68.42,-24.52],[-66.99,-22.99],[-66.27,-21.83],[-64.38,-22.8],[-62.85,-22.03],[-60.85,-23.88],[-58.81,-24.77],[-57.63,-25.6],[-57.61,-27.4],[-55.7,-27.39],[-54.63,-25.74],[-53.63,-26.12],[-54.49,-27.47],[-56.29,-28.85]]]},{"n":"Chile","p":[[[-68.63,-52.64],[-67.56,-54.87],[-67.29,-55.3],[-68.64,-55.58],[-69.96,-55.2],[-72.26,-54.5],[-74.66,-52.84],[-72.43,-53.72],[-70.59,-53.62],[-69.35,-52.52]],[[-69.59,-17.58],[-68.97,-18.98],[-68.76,-20.37],[-67.83,-22.87],[-66.99,-22.99],[-68.42,-24.52],[-68.59,-26.51],[-69.0,-27.52],[-70.01,-29.37],[-70.54,-31.37],[-69.81,-33.27],[-70.39,-35.17],[-71.12,-36.66],[-70.81,-38.55],[-71.68,-39.81],[-71.75,-42.05],[-71.92,-43.41],[-71.79,-44.21],[-71.22,-44.78],[-71.55,-45.56],[-72.45,-47.74],[-72.65,-48.88],[-73.33,-50.38],[-72.31,-50.68],[-71.91,-52.01],[-68.57,-52.3],[-69.94,-52.54],[-71.01,-53.83],[-72.56,-53.53],[-73.7,-52.84],[-75.26,-51.63],[-75.48,-50.38],[-75.18,-47.71],[-75.64,-46.65],[-74.35,-44.1],[-72.72,-42.38],[-73.7,-43.37],[-74.02,-41.79],[-73.22,-39.26],[-73.59,-37.16],[-72.55,-35.51],[-71.44,-32.42],[-71.37,-30.1],[-70.91,-27.64],[-70.4,-23.63],[-70.16,-19.76],[-69.86,-18.09]]]},{"n":"Dem. Rep. Congo","p":[[[29.34,-4.5],[29.42,-5.94],[30.2,-7.08],[30.74,-8.34],[29.0,-8.41],[28.45,-9.16],[28.5,-10.79],[28.64,-11.97],[29.62,-12.18],[28.93,-13.25],[28.16,-12.27],[27.16,-11.61],[25.75,-11.78],[24.78,-11.24],[24.26,-10.95],[23.46,-10.87],[22.4,-10.99],[22.21,-9.89],[21.8,-8.91],[21.75,-7.92],[20.51,-7.3],[20.09,-6.94],[19.42,-7.16],[19.02,-7.99],[18.13,-7.99],[17.09,-7.55],[16.57,-6.62],[13.38,-5.86],[12.74,-5.97],[12.18,-5.79],[12.47,-5.25],[13.0,-4.78],[13.6,-4.5],[14.21,-4.79],[15.17,-4.34],[16.01,-3.54],[16.41,-1.74],[17.52,-0.74],[17.66,-0.06],[17.77,0.86],[18.09,2.37],[18.45,3.5],[18.93,4.71],[20.29,4.69],[21.66,4.22],[22.7,4.63],[23.3,4.61],[24.81,4.9],[25.28,5.17],[26.4,5.15],[27.37,5.23],[28.43,4.29],[29.16,4.39],[29.95,4.17],[30.83,3.51],[31.17,2.2],[30.47,1.58],[29.88,0.6],[29.59,-0.59],[29.29,-1.62],[29.12,-2.29],[29.28,-3.29]]]},{"n":"Somalia","p":[[[41.59,-1.68],[40.98,2.78],[42.13,4.23],[43.66,4.96],[47.79,8.0],[48.94,9.45],[48.94,10.98],[48.95,11.41],[49.27,11.43],[50.26,11.68],[51.11,12.02],[51.04,11.17],[50.83,10.28],[50.07,8.08],[48.59,5.34],[46.56,2.86],[44.07,1.05],[42.04,-0.92],[41.59,-1.68]]]},{"n":"Kenya","p":[[[39.2,-4.68],[37.7,-3.1],[33.9,-0.95],[34.18,0.52],[35.04,1.91],[34.48,3.56],[34.62,4.85],[35.82,5.34],[36.16,4.45],[38.12,3.6],[38.67,3.62],[39.56,3.42],[40.77,4.26],[41.86,3.92],[40.99,-0.86],[40.88,-2.08],[40.26,-2.57],[39.8,-3.68],[39.2,-4.68]]]},{"n":"Sudan","p":[[[24.57,8.23],[23.46,8.95],[23.56,9.68],[22.98,10.71],[22.88,11.38],[22.5,12.26],[21.94,12.59],[22.3,13.37],[22.51,14.09],[22.57,14.94],[23.89,15.61],[23.85,20],[25,22],[32.9,22],[37.19,21.02],[37.11,19.81],[37.86,18.37],[37.9,17.43],[36.85,16.96],[36.32,14.82],[36.27,13.56],[35.26,12.08],[34.73,10.91],[33.96,9.58],[33.96,9.46],[33.84,9.98],[33.21,10.72],[33.21,12.18],[32.67,12.02],[32.31,11.68],[31.85,10.53],[30.84,9.71],[29.62,10.08],[29.0,9.6],[27.97,9.4],[27.11,9.64],[26.48,9.55],[25.79,10.41],[24.79,9.81],[24.19,8.73],[24.57,8.23]]]},{"n":"Chad","p":[[[23.84,19.58],[23.02,15.68],[22.3,14.33],[22.18,13.79],[22.04,12.96],[22.29,12.65],[22.51,11.68],[22.86,11.14],[21.72,10.57],[20.06,9.01],[18.81,8.98],[18.39,8.28],[16.71,7.51],[16.29,7.75],[15.28,7.42],[15.12,8.38],[14.54,8.97],[14.17,10.02],[14.91,9.99],[14.92,10.89],[14.89,12.22],[14.6,13.33],[13.96,14.0],[13.97,15.68],[15.3,17.93],[15.9,20.39],[15.47,21.05],[14.85,22.86],[19.85,21.5]]]},{"n":"Haiti","p":[[[-71.71,19.71],[-71.7,18.79],[-71.69,18.32],[-72.37,18.21],[-73.45,18.22],[-74.46,18.34],[-73.45,18.53],[-72.33,18.67],[-72.78,19.48],[-73.19,19.92],[-71.71,19.71]]]},{"n":"Dominican Rep.","p":[[[-71.71,18.04],[-71.95,18.62],[-71.62,19.17],[-71.59,19.88],[-70.21,19.62],[-69.77,19.29],[-69.25,19.02],[-68.32,18.61],[-69.16,18.42],[-69.95,18.43],[-70.52,18.18],[-71.0,18.28],[-71.66,17.76]]]},{"n":"Russia","p":[[[49.1,46.4],[47.68,45.64],[47.59,43.66],[48.58,41.81],[47.99,41.41],[47.37,41.22],[46.4,41.86],[45.47,42.5],[43.93,42.55],[42.39,43.22],[40.08,43.55],[38.68,44.28],[36.68,45.24],[38.23,46.24],[39.15,47.04],[38.22,47.1],[38.77,47.83],[39.9,48.23],[40.08,49.31],[38.59,49.93],[37.39,50.38],[35.36,50.58],[35.02,51.21],[34.14,51.57],[33.75,52.34],[32.41,52.29],[31.79,52.1],[31.54,52.74],[31.5,53.17],[32.69,53.35],[31.73,53.79],[31.38,54.16],[30.97,55.08],[29.9,55.79],[29.23,55.92],[27.86,56.76],[27.29,57.47],[27.42,58.72],[27.98,59.48],[29.12,60.03],[28.07,60.5],[31.14,62.36],[30.04,63.55],[29.54,64.95],[29.05,66.94],[28.45,68.36],[29.4,69.16],[31.1,69.56],[33.78,69.3],[40.29,67.93],[41.13,66.79],[38.38,66.0],[33.18,66.63],[34.88,65.44],[36.23,64.11],[37.14,64.33],[37.18,65.14],[40.44,64.76],[42.09,66.48],[43.95,66.07],[43.7,67.35],[43.45,68.57],[46.82,67.69],[45.56,67.01],[47.89,66.88],[50.23,68.0],[54.47,68.81],[54.73,68.1],[57.32,68.47],[59.94,68.28],[60.03,69.52],[63.5,69.55],[68.51,68.09],[68.16,69.14],[66.93,69.45],[66.72,70.71],[68.54,71.93],[69.94,73.04],[72.8,72.22],[72.47,71.09],[72.56,69.02],[73.24,67.74],[72.42,66.17],[73.92,66.79],[75.05,67.76],[74.94,68.99],[73.6,69.63],[73.1,71.45],[74.66,72.83],[75.68,72.3],[76.36,71.15],[77.58,72.27],[81.5,71.75],[80.51,73.65],[84.66,73.81],[86.01,74.46],[88.32,75.14],[92.9,75.77],[95.86,76.14],[98.92,76.45],[101.04,76.86],[104.35,77.7],[104.7,77.13],[107.24,76.48],[111.08,76.71],[114.13,75.85],[112.78,75.03],[109.4,74.18],[112.12,73.79],[113.53,73.34],[115.57,73.75],[119.02,73.12],[123.26,73.74],[126.98,73.57],[129.05,72.4],[129.72,71.19],[132.25,71.84],[135.56,71.66],[138.23,71.63],[139.15,72.42],[149.5,72.2],[152.97,70.84],[159.0,70.87],[159.71,69.72],[162.28,69.64],[165.94,69.47],[169.58,68.69],[170.01,69.65],[173.64,69.82],[178.6,69.4],[180,64.98],[178.71,64.53],[178.31,64.08],[179.37,62.98],[179.23,62.3],[174.57,61.77],[172.15,60.95],[170.33,59.88],[166.29,59.79],[164.88,59.73],[163.22,59.21],[162.05,57.84],[163.06,56.16],[161.7,55.29],[160.37,54.34],[158.53,52.96],[156.79,51.01],[155.99,53.16],[155.91,56.77],[156.81,57.83],[160.15,59.31],[163.67,61.14],[163.26,62.47],[160.12,60.54],[156.72,61.43],[155.04,59.14],[151.27,58.78],[149.78,59.66],[145.49,59.34],[138.96,57.09],[136.7,54.6],[138.16,53.76],[139.9,54.19],[141.38,52.24],[140.51,50.05],[138.55,47.0],[136.86,45.14],[134.87,43.4],[132.91,42.8],[130.94,42.55],[130.78,42.22],[130.78,42.22],[130.64,42.4],[131.14,42.93],[131.03,44.97],[133.1,45.14],[134.11,47.21],[135.03,48.48],[132.51,47.79],[130.58,48.73],[127.66,49.76],[126.94,51.35],[125.95,52.79],[123.57,53.46],[121.0,53.25],[120.73,52.52],[120.18,51.64],[119.29,50.14],[116.68,49.89],[114.96,50.14],[112.9,49.54],[110.66,49.13],[108.48,49.28],[106.89,50.27],[104.62,50.28],[102.26,50.51],[100.89,51.52],[98.86,52.05],[98.23,50.42],[95.81,49.98],[94.15,50.48],[92.23,50.8],[88.81,49.47],[87.36,49.21],[85.54,49.69],[84.42,50.31],[83.38,51.07],[80.57,51.39],[77.8,53.4],[76.89,54.49],[73.43,53.49],[72.22,54.38],[70.87,55.17],[68.17,54.97],[65.18,54.35],[60.98,53.66],[60.74,52.72],[59.97,51.96],[61.34,50.8],[59.64,50.55],[56.78,51.04],[54.53,51.03],[50.77,51.69],[48.58,49.87],[46.75,49.36],[46.47,48.39],[48.06,47.74],[48.59,46.56]],[[93.78,81.02],[97.88,80.75],[99.94,78.88],[94.97,79.04],[92.55,80.14],[93.78,81.02]],[[102.84,79.28],[105.08,78.31],[101.26,79.23],[102.84,79.28]],[[138.83,76.14],[145.09,75.56],[140.61,74.85],[136.97,75.26],[138.83,76.14]],[[148.22,75.35],[149.58,74.69],[146.12,75.17],[148.22,75.35]],[[139.86,73.37],[142.06,73.86],[143.6,73.21],[140.04,73.32]],[[44.85,80.59],[48.32,80.78],[49.1,80.75],[51.52,80.7],[49.79,80.42],[48.75,80.18],[46.5,80.25],[44.85,80.59]],[[22.73,54.33],[19.66,54.43],[21.27,55.19],[22.76,54.86],[22.73,54.33]],[[53.51,73.75],[55.63,75.08],[61.17,76.25],[66.21,76.81],[68.85,76.54],[64.64,75.74],[58.48,74.31],[55.42,72.37],[57.54,70.72],[53.68,70.76],[51.6,71.47],[52.48,72.23],[54.43,73.63]],[[142.91,53.7],[143.24,51.76],[144.65,48.98],[142.56,47.86],[143.51,46.14],[142.09,45.97],[142.02,47.78],[142.14,49.62],[141.59,51.94],[142.61,53.76],[142.65,54.37]],[[-174.93,67.21],[-174.34,66.34],[-171.86,66.91],[-170.89,65.54],[-172.56,64.46],[-173.89,64.28],[-175.98,64.92],[-177.22,65.52],[-178.9,65.74],[-179.88,65.87],[-180,64.98],[-177.55,68.2]],[[-178.69,70.89],[-180,71.52],[-179.02,71.56],[-177.66,71.13]],[[33.44,45.97],[34.41,46.01],[34.86,45.77],[35.02,45.65],[36.53,45.47],[35.24,44.94],[33.33,44.56],[32.45,45.33],[33.59,45.85]]]},{"n":"Bahamas","p":[[[-77.79,27.04],[-77.17,25.88],[-77.34,26.53],[-77.79,27.04]],[[-78.19,25.21],[-77.54,24.34],[-77.78,23.71],[-78.41,24.58]]]},{"n":"Falkland Is.","p":[[[-61.2,-51.85],[-59.15,-51.5],[-57.75,-51.55],[-59.4,-52.2],[-60.7,-52.3]]]},{"n":"Norway","p":[[[15.14,79.67],[16.99,80.05],[21.54,78.96],[18.47,77.83],[17.12,76.81],[13.76,77.38],[13.17,78.02],[10.44,79.65],[13.72,79.66]],[[31.1,69.56],[28.59,69.06],[27.73,70.16],[25.69,69.09],[23.66,68.89],[21.24,69.37],[20.03,69.07],[17.99,68.57],[16.77,68.01],[15.11,66.19],[13.92,64.45],[12.58,64.07],[11.99,61.8],[12.3,60.12],[11.03,58.86],[8.38,58.31],[5.67,58.59],[4.99,61.97],[8.55,63.45],[12.36,65.88],[16.44,68.56],[21.38,70.26],[24.55,71.03],[28.17,71.19],[30.01,70.19]],[[27.41,80.06],[23.02,79.4],[19.9,79.84],[17.37,80.32],[21.91,80.36],[25.45,80.41]],[[24.72,77.85],[20.73,77.68],[20.81,78.25],[23.28,78.08]]]},{"n":"Greenland","p":[[[-46.76,82.63],[-39.9,83.18],[-35.09,83.65],[-20.85,82.73],[-26.52,82.3],[-31.4,82.02],[-24.84,81.79],[-22.07,81.73],[-20.62,81.52],[-12.77,81.72],[-16.29,80.58],[-20.05,80.18],[-18.9,79.4],[-19.67,77.64],[-20.04,76.94],[-19.83,76.1],[-20.67,75.16],[-21.59,74.22],[-20.76,73.46],[-23.57,73.31],[-22.3,72.18],[-24.79,72.33],[-22.13,71.47],[-23.54,70.47],[-25.54,71.43],[-26.36,70.23],[-22.35,70.13],[-27.75,68.47],[-31.78,68.12],[-34.2,66.68],[-37.04,65.94],[-39.81,65.46],[-40.68,64.14],[-42.82,62.68],[-42.87,61.07],[-44.79,60.04],[-48.26,60.86],[-49.9,62.38],[-52.14,64.28],[-53.66,66.1],[-53.97,67.19],[-51.48,68.73],[-50.87,69.93],[-52.56,69.43],[-54.68,69.61],[-54.36,70.82],[-51.39,70.57],[-54.0,71.55],[-55.83,71.65],[-55.33,72.96],[-57.32,74.71],[-58.59,75.52],[-63.39,76.18],[-68.5,76.06],[-71.4,77.01],[-66.76,77.38],[-73.3,78.04],[-69.37,78.91],[-65.32,79.76],[-67.15,80.52],[-62.23,81.32],[-60.28,82.03],[-54.13,82.2],[-50.39,82.44],[-46.6,81.99],[-46.9,82.2]]]},{"n":"Fr. S. Antarctic Lands","p":[[[68.94,-48.62],[70.53,-49.06],[70.28,-49.71],[68.72,-49.24],[68.94,-48.62]]]},{"n":"Timor-Leste","p":[[[124.97,-8.89],[125.95,-8.43],[126.96,-8.27],[126.97,-8.67],[125.09,-9.39],[124.97,-8.89]]]},{"n":"South Africa","p":[[[16.34,-28.58],[17.22,-28.36],[17.84,-28.86],[19.0,-28.97],[19.9,-24.77],[20.76,-25.87],[20.89,-26.83],[22.11,-26.28],[22.82,-25.5],[23.73,-25.39],[25.03,-25.72],[25.77,-25.17],[26.49,-24.62],[27.12,-23.57],[29.43,-22.09],[30.32,-22.27],[31.19,-22.25],[31.93,-24.37],[31.84,-25.84],[31.04,-25.73],[30.68,-26.4],[31.28,-27.29],[32.07,-26.73],[32.58,-27.47],[32.2,-28.75],[31.33,-29.4],[30.62,-30.42],[28.93,-32.17],[27.46,-33.23],[25.91,-33.67],[25.17,-33.8],[23.59,-33.79],[22.57,-33.86],[20.69,-34.42],[19.62,-34.82],[18.86,-34.44],[18.38,-34.14],[18.25,-33.28],[18.25,-32.43],[17.57,-30.73],[17.06,-29.88]]]},{"n":"Lesotho","p":[[[28.98,-28.96],[29.02,-29.74],[28.29,-30.23],[27.75,-30.65],[27.53,-29.24],[28.54,-28.65]]]},{"n":"Mexico","p":[[[-117.13,32.54],[-114.72,32.72],[-113.3,32.04],[-109.03,31.34],[-108.24,31.75],[-106.14,31.4],[-105.04,30.64],[-104.46,29.57],[-103.11,28.97],[-101.66,29.78],[-100.46,28.7],[-99.52,27.54],[-99.02,26.37],[-97.53,25.84],[-97.53,24.99],[-97.78,22.93],[-97.7,21.9],[-97.19,20.64],[-96.29,19.32],[-94.84,18.56],[-93.55,18.42],[-92.04,18.7],[-90.77,19.28],[-90.45,20.71],[-89.6,21.26],[-87.66,21.46],[-86.81,21.33],[-87.38,20.26],[-87.44,19.47],[-87.84,18.26],[-88.3,18.5],[-88.85,17.88],[-89.15,17.96],[-90.07,17.82],[-91.0,17.25],[-91.08,16.92],[-90.6,16.47],[-90.46,16.07],[-92.23,15.25],[-92.2,14.83],[-93.36,15.62],[-94.69,16.2],[-96.05,15.75],[-97.26,15.92],[-98.95,16.57],[-100.83,17.17],[-101.92,17.92],[-103.5,18.29],[-104.99,19.32],[-105.73,20.43],[-105.5,20.82],[-105.27,21.42],[-105.69,22.27],[-106.91,23.77],[-108.4,25.17],[-109.44,25.82],[-109.8,26.68],[-110.64,27.86],[-111.76,28.47],[-112.27,29.27],[-113.16,30.79],[-113.87,31.57],[-114.78,31.8],[-114.77,30.91],[-114.33,29.75],[-113.42,28.83],[-113.14,28.41],[-112.76,27.78],[-112.24,27.17],[-111.28,25.73],[-110.71,24.83],[-110.17,24.27],[-109.41,23.36],[-109.85,22.82],[-110.3,23.43],[-111.67,24.48],[-112.15,25.47],[-112.78,26.32],[-113.6,26.64],[-114.47,27.14],[-114.98,27.8],[-114.2,28.12],[-114.93,29.28],[-115.89,30.18],[-116.72,31.64]]]},{"n":"Uruguay","p":[[[-57.63,-30.22],[-55.97,-30.88],[-54.57,-31.49],[-53.21,-32.73],[-53.37,-33.77],[-54.94,-34.95],[-56.22,-34.86],[-57.82,-34.46],[-58.35,-33.26],[-58.14,-32.04],[-57.63,-30.22]]]},{"n":"Brazil","p":[[[-53.37,-33.77],[-53.21,-32.73],[-54.57,-31.49],[-55.97,-30.88],[-57.63,-30.22],[-55.16,-27.88],[-53.65,-26.92],[-54.13,-25.55],[-54.43,-25.16],[-54.29,-24.02],[-55.03,-24.0],[-55.52,-23.57],[-55.8,-22.36],[-56.88,-22.28],[-57.87,-20.73],[-57.85,-19.97],[-57.68,-18.96],[-57.73,-17.55],[-58.39,-16.88],[-60.16,-16.26],[-60.25,-15.08],[-60.46,-14.35],[-61.08,-13.48],[-62.13,-13.2],[-63.2,-12.63],[-65.4,-11.57],[-65.44,-10.51],[-66.65,-9.93],[-68.05,-10.71],[-68.79,-11.04],[-70.09,-11.12],[-70.48,-9.49],[-72.18,-10.05],[-73.23,-9.46],[-73.57,-8.42],[-73.72,-7.34],[-73.12,-6.63],[-72.96,-5.74],[-71.75,-4.59],[-70.79,-4.25],[-69.44,-1.56],[-69.58,-0.55],[-70.02,0.54],[-69.25,0.6],[-69.8,1.09],[-67.87,1.69],[-67.26,1.72],[-66.88,1.25],[-65.55,0.79],[-64.61,1.33],[-64.08,1.92],[-63.42,2.41],[-64.41,3.13],[-64.82,4.06],[-63.89,4.02],[-62.8,4.01],[-60.97,4.54],[-60.73,5.2],[-59.98,5.01],[-59.77,4.42],[-59.82,3.61],[-59.72,2.25],[-59.03,1.32],[-58.43,1.46],[-57.66,1.68],[-56.78,1.86],[-56.0,1.82],[-56.07,2.22],[-55.57,2.42],[-54.52,2.31],[-53.78,2.38],[-53.42,2.05],[-52.56,2.5],[-51.66,4.16],[-51.07,3.65],[-49.97,1.74],[-50.7,0.22],[-48.62,-0.24],[-47.82,-0.58],[-44.91,-1.55],[-44.58,-2.69],[-41.47,-2.91],[-38.5,-3.7],[-36.45,-5.11],[-35.24,-5.46],[-34.73,-7.34],[-35.64,-9.65],[-37.68,-12.17],[-38.67,-13.06],[-38.88,-15.67],[-39.27,-17.87],[-39.76,-19.6],[-40.94,-21.94],[-41.99,-22.97],[-44.65,-23.35],[-46.47,-24.09],[-48.5,-25.88],[-48.47,-27.18],[-48.89,-28.67],[-50.7,-30.98],[-52.26,-32.25],[-53.37,-33.77]]]},{"n":"Bolivia","p":[[[-69.53,-10.95],[-68.27,-11.01],[-67.17,-10.31],[-65.34,-9.76],[-65.32,-10.9],[-64.32,-12.46],[-62.8,-13.0],[-61.71,-13.49],[-60.5,-13.78],[-60.26,-14.65],[-60.54,-15.09],[-58.24,-16.3],[-58.28,-17.27],[-57.5,-18.17],[-57.95,-19.4],[-58.17,-20.18],[-59.12,-19.36],[-61.79,-19.63],[-62.29,-21.05],[-62.85,-22.03],[-64.38,-22.8],[-66.27,-21.83],[-67.83,-22.87],[-68.76,-20.37],[-68.97,-18.98],[-69.59,-17.58],[-69.39,-15.66],[-69.34,-14.95],[-68.93,-13.6],[-68.67,-12.56]]]},{"n":"Peru","p":[[[-69.89,-4.3],[-70.93,-4.4],[-72.89,-5.27],[-73.22,-6.09],[-73.72,-6.92],[-73.99,-7.52],[-73.02,-9.03],[-72.56,-9.52],[-71.3,-10.08],[-70.55,-11.01],[-69.53,-10.95],[-68.88,-12.9],[-68.95,-14.45],[-69.16,-15.32],[-68.96,-16.5],[-69.86,-18.09],[-71.38,-17.77],[-73.44,-16.36],[-76.01,-14.65],[-76.26,-13.54],[-78.09,-10.38],[-79.45,-7.93],[-80.54,-6.54],[-80.93,-5.69],[-81.1,-4.04],[-80.18,-3.82],[-80.44,-4.43],[-79.62,-4.45],[-78.64,-4.55],[-77.84,-3.0],[-75.54,-1.56],[-75.37,-0.15],[-74.44,-0.53],[-73.66,-1.26],[-72.33,-2.43],[-71.41,-2.34],[-70.05,-2.73],[-70.39,-3.77]]]},{"n":"Colombia","p":[[[-66.88,1.25],[-67.26,1.72],[-67.87,1.69],[-69.8,1.09],[-69.25,0.6],[-70.02,0.54],[-69.58,-0.55],[-69.44,-1.56],[-70.39,-3.77],[-70.05,-2.73],[-71.41,-2.34],[-72.33,-2.43],[-73.66,-1.26],[-74.44,-0.53],[-75.37,-0.15],[-76.29,0.42],[-77.42,0.4],[-77.86,0.81],[-78.99,1.69],[-78.66,2.27],[-77.93,2.7],[-77.13,3.85],[-77.31,4.67],[-77.32,5.85],[-77.88,7.22],[-77.43,7.64],[-77.47,8.52],[-76.84,8.64],[-75.67,9.44],[-75.48,10.62],[-74.28,11.1],[-73.41,11.23],[-72.24,11.96],[-71.4,12.38],[-71.33,11.78],[-72.23,11.11],[-72.91,10.45],[-73.3,9.15],[-72.66,8.63],[-72.36,8.0],[-72.44,7.42],[-71.96,6.99],[-70.09,6.96],[-68.99,6.21],[-67.7,6.27],[-67.52,5.56],[-67.82,4.5],[-67.34,3.54],[-67.81,2.82],[-67.18,2.25]]]},{"n":"Panama","p":[[[-77.35,8.67],[-77.24,7.94],[-77.75,7.71],[-78.21,7.51],[-78.18,8.32],[-78.62,8.72],[-79.56,8.93],[-80.16,8.33],[-80.48,8.09],[-80.28,7.42],[-80.89,7.22],[-81.19,7.65],[-81.72,8.11],[-82.39,8.29],[-82.85,8.07],[-82.91,8.42],[-82.87,8.81],[-82.93,9.07],[-82.55,9.57],[-82.21,9.0],[-81.71,9.03],[-80.95,8.86],[-79.91,9.31],[-79.02,9.55],[-78.5,9.42],[-77.73,8.95]]]},{"n":"Costa Rica","p":[[[-82.55,9.57],[-82.93,9.07],[-82.87,8.81],[-82.91,8.42],[-83.51,8.45],[-83.6,8.83],[-83.91,9.29],[-84.65,9.62],[-84.98,10.09],[-85.11,9.56],[-85.66,9.93],[-85.79,10.44],[-85.94,10.9],[-85.56,11.22],[-84.67,11.08],[-84.19,10.79],[-83.66,10.94],[-83.02,9.99]]]},{"n":"Nicaragua","p":[[[-83.66,10.94],[-84.19,10.79],[-84.67,11.08],[-85.56,11.22],[-86.06,11.4],[-86.75,12.14],[-87.67,12.91],[-87.39,12.91],[-87.01,13.03],[-86.73,13.26],[-86.52,13.78],[-86.1,14.04],[-85.7,13.96],[-85.17,14.35],[-85.05,14.55],[-84.82,14.82],[-84.45,14.62],[-83.98,14.75],[-83.49,15.02],[-83.23,14.9],[-83.18,14.31],[-83.52,13.57],[-83.5,12.87],[-83.63,12.32],[-83.65,11.63],[-83.81,11.1]]]},{"n":"Honduras","p":[[[-83.15,15.0],[-83.63,14.88],[-84.23,14.75],[-84.65,14.67],[-84.92,14.79],[-85.15,14.56],[-85.51,14.08],[-85.8,13.84],[-86.31,13.77],[-86.76,13.75],[-86.88,13.25],[-87.32,12.98],[-87.79,13.38],[-87.86,13.89],[-88.5,13.85],[-88.84,14.14],[-89.35,14.42],[-89.23,14.87],[-88.68,15.35],[-88.12,15.69],[-87.62,15.88],[-87.37,15.85],[-86.44,15.78],[-86.0,16.01],[-85.44,15.89],[-84.98,16.0],[-84.37,15.84],[-83.77,15.42],[-83.15,15.0]]]},{"n":"El Salvador","p":[[[-89.35,14.42],[-88.84,14.14],[-88.5,13.85],[-87.86,13.89],[-87.79,13.38],[-88.48,13.16],[-89.26,13.46],[-90.1,13.74],[-89.72,14.13],[-89.59,14.36]]]},{"n":"Guatemala","p":[[[-92.23,14.54],[-92.09,15.06],[-91.75,16.07],[-90.44,16.41],[-90.71,16.69],[-91.45,17.25],[-91.0,17.82],[-89.14,17.81],[-89.23,15.89],[-88.6,15.71],[-88.23,15.73],[-89.15,15.07],[-89.15,14.68],[-89.59,14.36],[-89.72,14.13],[-90.1,13.74],[-91.23,13.93],[-92.23,14.54]]]},{"n":"Belize","p":[[[-89.14,17.81],[-89.03,18.0],[-88.49,18.49],[-88.3,18.35],[-88.12,18.08],[-88.2,17.49],[-88.24,17.04],[-88.55,16.27],[-88.93,15.89],[-89.15,17.02]]]},{"n":"Venezuela","p":[[[-60.73,5.2],[-60.97,4.54],[-62.8,4.01],[-63.89,4.02],[-64.82,4.06],[-64.41,3.13],[-63.42,2.41],[-64.08,1.92],[-64.61,1.33],[-65.55,0.79],[-66.88,1.25],[-67.45,2.6],[-67.3,3.32],[-67.62,3.84],[-67.74,5.22],[-67.34,6.1],[-68.27,6.15],[-69.39,6.1],[-70.67,7.09],[-72.2,7.34],[-72.48,7.63],[-72.44,8.41],[-72.79,9.09],[-73.03,9.74],[-72.61,10.82],[-71.97,11.61],[-71.36,11.54],[-71.62,10.97],[-72.07,9.87],[-71.26,9.14],[-71.35,10.21],[-70.16,11.38],[-69.94,12.16],[-68.88,11.44],[-68.19,10.55],[-66.23,10.65],[-64.89,10.08],[-64.32,10.64],[-61.88,10.72],[-62.39,9.95],[-60.83,9.38],[-60.15,8.6],[-60.55,7.78],[-60.3,7.04],[-61.16,6.7],[-61.41,5.96]]]},{"n":"Guyana","p":[[[-56.54,1.9],[-57.34,1.95],[-58.11,1.51],[-58.54,1.27],[-59.65,1.79],[-59.97,2.76],[-59.54,3.96],[-60.11,4.57],[-60.21,5.24],[-61.41,5.96],[-61.16,6.7],[-60.3,7.04],[-60.55,7.78],[-59.1,8.0],[-58.45,6.83],[-57.54,6.32],[-57.31,5.07],[-57.86,4.58],[-57.6,3.33],[-57.15,2.77]]]},{"n":"Suriname","p":[[[-54.52,2.31],[-55.57,2.42],[-56.07,2.22],[-56.0,1.82],[-57.15,2.77],[-57.6,3.33],[-57.86,4.58],[-57.31,5.07],[-55.95,5.77],[-55.03,6.03],[-54.48,4.9],[-54.01,3.62],[-54.27,2.73]]]},{"n":"France","p":[[[-51.66,4.16],[-52.56,2.5],[-53.42,2.05],[-53.78,2.38],[-54.52,2.31],[-54.18,3.19],[-54.4,4.21],[-53.96,5.76],[-52.88,5.41],[-51.66,4.16]],[[6.19,49.46],[8.1,49.02],[7.47,47.62],[6.74,47.54],[6.04,46.73],[6.5,46.43],[6.8,45.71],[6.75,45.03],[7.55,44.13],[6.53,43.13],[3.1,43.08],[1.83,42.34],[0.34,42.58],[-1.9,43.42],[-1.19,46.01],[-2.96,47.57],[-4.59,48.68],[-1.62,48.64],[-0.99,49.35],[1.64,50.95],[2.66,50.8],[3.59,50.38],[4.8,49.99],[5.9,49.44]],[[8.75,42.63],[9.56,42.15],[8.78,41.58],[8.75,42.63]]]},{"n":"Ecuador","p":[[[-75.37,-0.15],[-75.54,-1.56],[-77.84,-3.0],[-78.64,-4.55],[-79.62,-4.45],[-80.44,-4.43],[-80.18,-3.82],[-79.77,-2.66],[-80.37,-2.69],[-80.76,-1.97],[-80.58,-0.91],[-80.02,0.36],[-79.54,0.98],[-77.86,0.81],[-77.42,0.4],[-76.29,0.42],[-75.37,-0.15]]]},{"n":"Puerto Rico","p":[[[-66.28,18.51],[-65.59,18.23],[-66.6,17.98],[-67.24,18.37],[-66.28,18.51]]]},{"n":"Jamaica","p":[[[-77.57,18.49],[-76.37,18.16],[-76.9,17.87],[-77.77,17.86],[-78.22,18.45],[-77.57,18.49]]]},{"n":"Cuba","p":[[[-82.27,23.19],[-80.62,23.11],[-79.28,22.4],[-77.99,22.28],[-76.52,21.21],[-75.6,21.02],[-74.93,20.69],[-74.3,20.05],[-75.63,19.87],[-77.76,19.86],[-77.49,20.67],[-78.48,21.03],[-79.28,21.56],[-80.52,22.04],[-82.17,22.39],[-82.78,22.69],[-83.91,22.15],[-84.55,21.8],[-84.45,22.2],[-83.78,22.79],[-82.51,23.08]]]},{"n":"Zimbabwe","p":[[[31.19,-22.25],[30.32,-22.27],[29.43,-22.09],[28.02,-21.49],[27.72,-20.5],[26.16,-19.29],[25.65,-18.54],[26.38,-17.85],[27.04,-17.94],[28.47,-16.47],[28.95,-16.04],[30.27,-15.51],[31.17,-15.86],[31.85,-16.32],[32.85,-16.71],[32.65,-18.67],[32.77,-19.72],[32.51,-20.4],[31.19,-22.25]]]},{"n":"Botswana","p":[[[29.43,-22.09],[27.12,-23.57],[26.49,-24.62],[25.77,-25.17],[25.03,-25.72],[23.73,-25.39],[22.82,-25.5],[22.11,-26.28],[20.89,-26.83],[20.76,-25.87],[19.9,-24.77],[20.88,-21.81],[21.66,-18.22],[23.58,-18.28],[24.52,-17.89],[25.26,-17.74],[25.85,-18.71],[27.3,-20.39],[27.73,-20.85],[28.79,-21.64]]]},{"n":"Namibia","p":[[[19.9,-24.77],[19.0,-28.97],[17.84,-28.86],[17.22,-28.36],[16.34,-28.58],[15.21,-27.09],[14.74,-25.39],[14.39,-22.66],[13.87,-21.7],[12.83,-19.67],[11.79,-18.07],[12.22,-17.11],[13.46,-16.97],[14.21,-17.35],[18.96,-17.79],[23.22,-17.52],[24.68,-17.35],[25.08,-17.66],[24.22,-17.89],[23.2,-17.87],[20.91,-18.25],[19.9,-21.85]]]},{"n":"Senegal","p":[[[-16.71,13.59],[-17.63,14.73],[-16.7,15.62],[-16.12,16.46],[-15.14,16.59],[-14.1,16.3],[-12.83,15.3],[-12.12,13.99],[-11.55,13.14],[-11.51,12.44],[-12.2,12.47],[-12.5,12.33],[-13.7,12.59],[-15.82,12.52],[-16.68,12.38],[-15.93,13.13],[-15.51,13.28],[-14.71,13.3],[-13.84,13.51],[-14.38,13.63],[-15.08,13.88],[-15.62,13.62]]]},{"n":"Mali","p":[[[-11.51,12.44],[-11.55,13.14],[-12.12,13.99],[-11.83,14.8],[-11.35,15.41],[-10.09,15.33],[-9.55,15.49],[-5.32,16.2],[-5.97,20.64],[-4.92,24.97],[1.82,20.61],[2.68,19.86],[3.16,19.06],[4.27,16.85],[3.64,15.57],[1.39,15.32],[0.37,14.93],[-0.52,15.12],[-2.0,14.56],[-2.97,13.8],[-3.52,13.34],[-4.28,13.23],[-5.22,11.71],[-5.47,10.95],[-5.82,10.22],[-6.21,10.52],[-6.67,10.43],[-7.62,10.15],[-8.03,10.21],[-8.28,10.79],[-8.62,10.81],[-8.38,11.39],[-8.91,12.09],[-9.33,12.33],[-9.89,12.06],[-10.59,11.92],[-11.04,12.21],[-11.46,12.08]]]},{"n":"Mauritania","p":[[[-17.06,21.0],[-12.93,21.33],[-12.87,23.28],[-11.97,25.93],[-8.68,27.4],[-6.45,24.96],[-5.49,16.33],[-5.54,15.5],[-9.7,15.26],[-10.65,15.13],[-11.67,15.39],[-12.17,14.62],[-13.44,16.04],[-14.58,16.6],[-15.62,16.37],[-16.46,16.14],[-16.27,17.17],[-16.26,19.1],[-16.28,20.09],[-17.06,21.0]]]},{"n":"Benin","p":[[[2.69,6.26],[1.62,6.83],[1.46,9.33],[1.08,10.18],[0.9,11.0],[1.45,11.55],[2.15,11.94],[2.85,12.24],[3.57,11.33],[3.6,10.33],[3.22,9.44],[2.72,8.51],[2.69,6.26]]]},{"n":"Niger","p":[[[14.85,22.86],[15.47,21.05],[15.9,20.39],[15.3,17.93],[13.97,15.68],[13.96,14.0],[14.6,13.33],[14.21,12.8],[14.0,12.46],[13.08,13.6],[11.53,13.33],[10.7,13.25],[9.52,12.85],[7.8,13.34],[6.82,13.12],[5.44,13.87],[4.11,13.53],[3.68,12.55],[2.85,12.24],[2.15,11.94],[1.02,12.85],[0.43,13.99],[0.37,14.93],[1.39,15.32],[3.64,15.57],[4.27,16.85],[5.68,19.6],[12.0,23.47],[14.14,22.49]]]},{"n":"Nigeria","p":[[[2.69,6.26],[2.72,8.51],[3.22,9.44],[3.6,10.33],[3.57,11.33],[3.68,12.55],[4.11,13.53],[5.44,13.87],[6.82,13.12],[7.8,13.34],[9.52,12.85],[10.7,13.25],[11.53,13.33],[13.08,13.6],[14.0,12.46],[14.58,12.09],[14.42,11.57],[13.31,10.16],[12.96,9.42],[12.22,8.31],[11.84,7.4],[11.06,6.64],[10.12,7.04],[9.23,6.44],[8.5,4.77],[7.08,4.46],[5.9,4.26],[5.03,5.61],[3.57,6.26]]]},{"n":"Cameroon","p":[[[14.5,12.86],[14.96,11.56],[15.47,9.98],[14.63,9.92],[13.95,9.55],[14.98,8.8],[15.44,7.69],[14.78,6.41],[14.46,5.45],[14.48,4.73],[15.04,3.85],[15.86,3.01],[16.01,2.27],[15.15,1.96],[13.08,2.27],[12.36,2.19],[11.28,2.26],[9.8,3.07],[8.95,3.9],[8.49,4.5],[8.76,5.48],[9.52,6.45],[10.5,7.06],[11.75,6.98],[12.06,7.8],[12.75,8.72],[13.17,9.64],[13.57,10.8],[14.47,11.9],[14.18,12.48],[14.5,12.86]]]},{"n":"Togo","p":[[[0.9,11.0],[1.08,10.18],[1.46,9.33],[1.62,6.83],[1.06,5.93],[0.57,6.91],[0.71,8.31],[0.37,9.47],[-0.05,10.71],[0.9,11.0]]]},{"n":"Ghana","p":[[[0.02,11.02],[0.37,10.19],[0.46,8.68],[0.49,7.41],[0.84,6.28],[-0.51,5.34],[-1.96,4.71],[-2.81,5.39],[-2.98,7.38],[-2.83,9.64],[-2.94,10.96],[-0.76,10.94],[0.02,11.02]]]},{"n":"C\u00f4te d'Ivoire","p":[[[-8.03,10.21],[-7.62,10.15],[-6.67,10.43],[-6.21,10.52],[-5.82,10.22],[-4.95,10.15],[-4.33,9.61],[-3.51,9.9],[-2.56,8.22],[-3.24,6.25],[-2.86,4.99],[-4.01,5.18],[-5.83,4.99],[-7.52,4.34],[-7.64,5.19],[-7.57,5.71],[-8.31,6.19],[-8.39,6.91],[-8.44,7.69],[-8.22,8.12],[-8.2,8.46],[-8.08,9.38],[-8.23,10.13]]]},{"n":"Guinea","p":[[[-13.7,12.59],[-12.5,12.33],[-12.2,12.47],[-11.51,12.44],[-11.3,12.08],[-10.87,12.18],[-10.17,11.84],[-9.57,12.19],[-9.13,12.31],[-8.79,11.81],[-8.58,11.14],[-8.41,10.91],[-8.34,10.49],[-8.23,10.13],[-8.08,9.38],[-8.2,8.46],[-8.22,8.12],[-8.44,7.69],[-8.93,7.31],[-9.4,7.53],[-9.76,8.54],[-10.23,8.41],[-10.49,8.72],[-10.62,9.27],[-11.12,10.05],[-12.15,9.86],[-12.6,9.62],[-13.25,8.9],[-14.07,9.89],[-14.58,10.21],[-14.84,10.88],[-14.69,11.53],[-14.12,11.68],[-13.74,11.81],[-13.72,12.25]]]},{"n":"Guinea-Bissau","p":[[[-16.68,12.38],[-15.82,12.52],[-13.7,12.59],[-13.83,12.14],[-13.9,11.68],[-14.38,11.51],[-15.13,11.04],[-16.09,11.52],[-16.31,11.96],[-16.68,12.38]]]},{"n":"Liberia","p":[[[-8.44,7.69],[-8.39,6.91],[-8.31,6.19],[-7.57,5.71],[-7.64,5.19],[-7.97,4.36],[-9.91,5.59],[-11.44,6.79],[-11.15,7.4],[-10.23,8.41],[-9.76,8.54],[-9.4,7.53],[-8.93,7.31],[-8.44,7.69]]]},{"n":"Sierra Leone","p":[[[-13.25,8.9],[-12.6,9.62],[-12.15,9.86],[-11.12,10.05],[-10.62,9.27],[-10.49,8.72],[-10.23,8.41],[-11.15,7.4],[-11.44,6.79],[-12.43,7.26],[-13.12,8.16]]]},{"n":"Burkina Faso","p":[[[-5.4,10.37],[-5.2,11.38],[-4.43,12.54],[-4.01,13.47],[-3.1,13.54],[-2.19,14.25],[-1.07,14.97],[-0.27,14.92],[0.3,14.44],[0.99,13.34],[2.18,12.63],[1.94,11.64],[1.24,11.11],[0.02,11.02],[-0.76,10.94],[-2.94,10.96],[-2.83,9.64],[-3.98,9.86],[-4.78,9.82],[-5.4,10.37]]]},{"n":"Central African Rep.","p":[[[27.37,5.23],[26.4,5.15],[25.28,5.17],[24.81,4.9],[23.3,4.61],[22.7,4.63],[21.66,4.22],[20.29,4.69],[18.93,4.71],[18.45,3.5],[17.13,3.73],[16.01,2.27],[15.86,3.01],[15.04,3.85],[14.48,4.73],[14.46,5.45],[14.78,6.41],[16.11,7.5],[16.46,7.73],[17.96,7.89],[18.91,8.63],[19.09,9.07],[21.0,9.48],[22.23,10.97],[22.98,10.71],[23.56,9.68],[23.46,8.95],[24.57,8.23],[25.12,7.5],[26.21,6.55],[27.21,5.55]]]},{"n":"Congo","p":[[[18.45,3.5],[18.09,2.37],[17.77,0.86],[17.66,-0.06],[17.52,-0.74],[16.41,-1.74],[16.01,-3.54],[15.17,-4.34],[14.21,-4.79],[13.6,-4.5],[13.0,-4.78],[12.32,-4.61],[11.09,-3.98],[11.48,-2.77],[12.5,-2.39],[13.11,-2.43],[14.3,-2.0],[14.32,-0.55],[14.28,1.2],[13.28,1.31],[13.08,2.27],[15.15,1.96],[16.01,2.27],[17.13,3.73],[18.45,3.5]]]},{"n":"Gabon","p":[[[11.28,2.26],[12.36,2.19],[13.08,2.27],[13.28,1.31],[14.28,1.2],[14.32,-0.55],[14.3,-2.0],[13.11,-2.43],[12.5,-2.39],[11.48,-2.77],[11.09,-3.98],[9.41,-2.14],[8.83,-0.78],[9.29,0.27],[9.83,1.07],[11.28,2.26]]]},{"n":"Eq. Guinea","p":[[[9.65,2.28],[11.29,1.06],[9.49,1.01],[9.65,2.28]]]},{"n":"Zambia","p":[[[30.74,-8.34],[31.56,-8.76],[32.76,-9.23],[33.49,-10.53],[33.11,-11.61],[32.99,-12.78],[33.21,-13.97],[30.27,-15.51],[28.95,-16.04],[28.47,-16.47],[27.04,-17.94],[26.38,-17.85],[25.08,-17.66],[24.68,-17.35],[23.22,-17.52],[21.89,-16.08],[24.02,-12.91],[24.08,-12.19],[24.02,-11.24],[24.26,-10.95],[24.78,-11.24],[25.75,-11.78],[27.16,-11.61],[28.16,-12.27],[28.93,-13.25],[29.62,-12.18],[28.64,-11.97],[28.5,-10.79],[28.45,-9.16],[29.0,-8.41],[30.74,-8.34]]]},{"n":"Malawi","p":[[[32.76,-9.23],[33.94,-9.69],[34.56,-11.52],[34.56,-13.58],[35.27,-13.89],[35.77,-15.9],[35.03,-16.8],[34.31,-15.48],[34.46,-14.61],[33.79,-14.45],[32.69,-13.71],[33.31,-12.44],[33.32,-10.8],[33.23,-9.68]]]},{"n":"Mozambique","p":[[[34.56,-11.52],[36.51,-11.72],[37.47,-11.57],[38.43,-11.29],[40.32,-10.32],[40.32,-10.32],[40.44,-11.76],[40.6,-14.2],[40.48,-15.41],[39.45,-16.72],[37.41,-17.59],[35.9,-18.84],[34.79,-19.78],[35.18,-21.25],[35.39,-22.14],[35.53,-23.07],[35.61,-23.71],[35.04,-24.48],[33.01,-25.36],[32.66,-26.15],[32.83,-26.74],[31.99,-26.29],[31.75,-25.48],[31.67,-23.66],[32.24,-21.12],[32.66,-20.3],[32.61,-19.42],[32.85,-17.98],[32.33,-16.39],[31.64,-16.07],[30.34,-15.88],[30.18,-14.8],[33.79,-14.45],[34.46,-14.61],[34.31,-15.48],[35.03,-16.8],[35.77,-15.9],[35.27,-13.89],[34.56,-13.58],[34.56,-11.52]]]},{"n":"eSwatini","p":[[[32.07,-26.73],[31.28,-27.29],[30.68,-26.4],[31.04,-25.73],[31.84,-25.84],[32.07,-26.73]]]},{"n":"Angola","p":[[[13.0,-4.78],[12.47,-5.25],[12.18,-5.79],[12.32,-4.61],[13.0,-4.78]],[[12.32,-6.1],[13.02,-5.98],[16.33,-5.88],[16.86,-7.22],[17.47,-8.07],[18.46,-7.85],[19.17,-7.74],[20.04,-7.12],[20.6,-6.94],[21.73,-7.29],[21.95,-8.31],[21.88,-9.52],[22.16,-11.08],[22.84,-11.02],[23.91,-10.93],[23.9,-11.72],[23.93,-12.57],[21.93,-12.9],[22.56,-16.9],[21.38,-17.93],[18.26,-17.31],[14.06,-17.42],[12.81,-16.94],[11.73,-17.3],[11.78,-15.79],[12.18,-14.45],[12.74,-13.14],[13.63,-12.04],[13.69,-10.73],[13.12,-9.77],[12.93,-8.96],[12.93,-7.6],[12.23,-6.29]]]},{"n":"Burundi","p":[[[30.47,-2.41],[30.74,-3.03],[30.51,-3.57],[29.75,-4.45],[29.28,-3.29],[29.63,-2.92],[30.47,-2.41]]]},{"n":"Israel","p":[[[35.72,32.71],[35.18,32.53],[35.23,31.75],[34.93,31.35],[35.42,31.1],[34.82,29.76],[34.27,31.22],[34.56,31.55],[34.75,32.07],[35.1,33.08],[35.46,33.09],[35.82,33.28],[35.7,32.72]]]},{"n":"Lebanon","p":[[[35.82,33.28],[35.46,33.09],[35.48,33.91],[36.0,34.64],[36.61,34.2],[35.82,33.28]]]},{"n":"Madagascar","p":[[[49.54,-12.47],[50.06,-13.56],[50.48,-15.23],[50.2,-16.0],[49.67,-15.71],[49.77,-16.88],[49.44,-17.95],[48.55,-20.5],[47.55,-23.78],[46.28,-25.18],[44.83,-25.35],[43.76,-24.46],[43.35,-22.78],[43.43,-21.34],[43.9,-20.83],[44.46,-19.44],[44.04,-18.33],[44.31,-16.85],[44.94,-16.18],[45.87,-15.79],[46.88,-15.21],[48.01,-14.09],[48.29,-13.78],[48.86,-12.49],[49.54,-12.47]]]},{"n":"Palestine","p":[[[35.4,31.49],[34.97,31.62],[34.97,31.87],[35.55,32.39],[35.4,31.49]]]},{"n":"Gambia","p":[[[-16.71,13.59],[-15.4,13.86],[-14.69,13.63],[-14.05,13.79],[-14.28,13.28],[-15.14,13.51],[-15.69,13.27],[-16.84,13.15]]]},{"n":"Tunisia","p":[[[9.48,30.31],[8.44,32.51],[7.61,33.34],[8.14,34.66],[8.22,36.43],[9.51,37.35],[10.18,36.72],[11.1,36.9],[10.59,35.95],[10.81,34.83],[10.34,33.79],[11.11,33.29],[11.43,32.37],[10.64,31.76],[10.06,30.96],[9.48,30.31]]]},{"n":"Algeria","p":[[[-8.68,27.4],[-8.67,27.66],[-7.06,29.58],[-5.24,30.0],[-3.69,30.9],[-3.07,31.72],[-1.31,32.26],[-1.39,32.86],[-1.79,34.53],[-1.21,35.71],[0.5,36.3],[3.16,36.78],[5.32,36.72],[7.33,37.12],[8.42,36.95],[8.38,35.48],[7.52,34.1],[8.43,32.75],[9.06,32.1],[9.81,29.42],[9.68,28.14],[9.63,27.14],[9.32,26.09],[9.95,24.94],[10.77,24.56],[12.0,23.47],[5.68,19.6],[3.16,19.06],[2.68,19.86],[1.82,20.61],[-4.92,24.97]]]},{"n":"Jordan","p":[[[35.55,32.39],[36.83,32.31],[39.2,32.16],[37.0,31.51],[37.67,30.34],[36.74,29.87],[36.07,29.2],[34.92,29.5],[35.4,31.49],[35.55,32.39]]]},{"n":"United Arab Emirates","p":[[[51.58,24.25],[51.79,24.02],[53.4,24.15],[54.69,24.8],[56.07,26.06],[56.4,24.92],[55.8,24.27],[55.53,23.93],[55.23,23.11],[55.01,22.5],[51.62,24.01]]]},{"n":"Qatar","p":[[[50.81,24.75],[51.01,26.01],[51.59,25.8],[51.39,24.63],[50.81,24.75]]]},{"n":"Kuwait","p":[[[47.97,29.98],[48.09,29.31],[47.71,28.53],[46.57,29.1],[47.97,29.98]]]},{"n":"Iraq","p":[[[39.2,32.16],[41.01,34.42],[41.29,36.36],[42.35,37.23],[43.94,37.26],[44.77,37.17],[46.08,35.68],[45.65,34.75],[46.11,33.02],[47.85,31.71],[48.0,30.99],[48.57,29.93],[47.3,30.06],[44.71,29.18],[40.4,31.89]]]},{"n":"Oman","p":[[[55.21,22.71],[55.53,23.52],[55.98,24.13],[55.89,24.92],[56.85,24.24],[58.14,23.75],[59.18,22.99],[59.81,22.53],[59.44,21.71],[58.86,21.11],[58.03,20.48],[57.67,19.74],[57.69,18.94],[56.61,18.57],[56.28,17.88],[55.27,17.63],[54.79,16.95],[53.57,16.71],[52.78,17.35],[55.0,20.0],[55.21,22.71]]]},{"n":"Vanuatu","p":[[[166.79,-15.67],[166.63,-14.63],[167.27,-15.74],[166.79,-15.67]]]},{"n":"Cambodia","p":[[[102.58,12.19],[102.99,14.23],[105.22,14.27],[106.5,14.57],[107.61,13.54],[105.81,11.57],[105.2,10.89],[103.5,10.63],[102.58,12.19]]]},{"n":"Thailand","p":[[[105.22,14.27],[102.99,14.23],[102.58,12.19],[100.83,12.63],[100.1,13.41],[99.48,10.85],[99.22,9.24],[100.28,8.3],[101.02,6.86],[102.14,6.22],[101.15,5.69],[100.26,6.64],[99.69,6.85],[98.99,7.91],[98.34,7.79],[98.26,8.97],[99.04,10.96],[99.2,12.8],[99.1,13.83],[98.19,15.12],[98.9,16.18],[97.86,17.57],[97.8,18.63],[98.96,19.75],[100.12,20.42],[100.61,19.51],[101.04,18.41],[102.11,18.11],[103.0,17.96],[103.96,18.24],[104.78,16.44],[105.54,14.72]]]},{"n":"Laos","p":[[[107.38,14.2],[106.04,13.88],[105.54,14.72],[104.78,16.44],[103.96,18.24],[103.0,17.96],[102.11,18.11],[101.04,18.41],[100.61,19.51],[100.12,20.42],[101.18,21.44],[101.8,21.17],[102.17,22.46],[103.2,20.77],[104.82,19.89],[103.9,19.27],[105.93,17.49],[107.31,15.91],[107.38,14.2]]]},{"n":"Myanmar","p":[[[100.12,20.42],[98.96,19.75],[97.8,18.63],[97.86,17.57],[98.9,16.18],[98.19,15.12],[99.1,13.83],[99.2,12.8],[99.04,10.96],[98.46,10.68],[98.43,12.03],[98.1,13.64],[97.6,16.1],[96.51,16.43],[94.81,15.8],[94.53,17.28],[93.54,19.37],[93.08,19.86],[92.3,21.48],[92.67,22.04],[93.06,22.7],[93.33,24.08],[94.55,24.68],[95.16,26.0],[96.42,27.26],[97.05,27.7],[97.33,28.26],[98.25,27.75],[98.71,26.74],[97.72,25.08],[98.66,24.06],[99.53,22.95],[99.98,21.74],[101.15,21.85],[100.33,20.79]]]},{"n":"Vietnam","p":[[[104.33,10.49],[106.25,10.96],[107.49,12.34],[107.38,14.2],[107.31,15.91],[105.93,17.49],[103.9,19.27],[104.82,19.89],[103.2,20.77],[102.17,22.46],[103.5,22.7],[105.33,23.35],[106.73,22.79],[107.04,21.81],[106.72,20.7],[105.66,19.06],[107.36,16.7],[108.88,15.28],[109.2,11.67],[107.22,10.36],[105.16,8.6],[105.08,9.92]]]},{"n":"North Korea","p":[[[130.64,42.4],[130.78,42.22],[129.97,41.94],[129.71,40.88],[129.01,40.49],[127.97,40.03],[127.5,39.32],[127.78,39.05],[128.21,38.37],[127.07,38.26],[126.24,37.84],[125.69,37.94],[125.28,37.67],[124.98,37.95],[124.99,38.55],[125.13,38.85],[125.32,39.55],[124.27,39.93],[126.18,41.11],[127.34,41.5],[128.05,41.99],[129.99,42.99]]]},{"n":"South Korea","p":[[[126.17,37.75],[126.68,37.8],[127.78,38.3],[128.35,38.61],[129.46,36.78],[129.09,35.08],[127.39,34.48],[126.37,34.93],[126.12,36.73],[126.17,37.75]]]},{"n":"Mongolia","p":[[[87.75,49.3],[90.71,50.33],[93.1,50.5],[94.82,50.01],[97.26,49.73],[97.83,51.01],[99.98,51.63],[102.07,51.26],[103.68,50.09],[105.89,50.41],[107.87,49.79],[109.4,49.29],[111.58,49.38],[114.36,50.25],[115.49,49.81],[116.19,49.13],[115.74,47.73],[117.3,47.7],[118.87,47.75],[119.66,46.69],[117.42,46.67],[115.99,45.73],[113.46,44.81],[111.87,45.1],[111.67,44.07],[111.13,43.41],[109.24,42.52],[106.13,42.13],[104.52,41.91],[101.83,42.51],[99.52,42.52],[96.35,42.73],[95.31,44.24],[93.48,44.98],[90.95,45.29],[90.97,46.89],[88.85,48.07],[87.75,49.3]]]},{"n":"India","p":[[[97.33,28.26],[97.05,27.7],[96.42,27.26],[95.16,26.0],[94.55,24.68],[93.33,24.08],[93.06,22.7],[92.67,22.04],[91.87,23.62],[91.16,23.5],[91.92,24.13],[91.8,25.15],[89.92,25.27],[89.36,26.01],[88.21,25.77],[88.31,24.87],[88.7,24.23],[88.88,22.88],[88.89,21.69],[86.98,21.5],[86.5,20.15],[83.94,18.3],[82.19,17.02],[81.69,16.31],[80.32,15.9],[80.23,13.84],[79.86,12.06],[79.34,10.31],[79.19,9.22],[77.94,8.25],[76.59,8.9],[75.75,11.31],[74.86,12.74],[74.44,14.62],[73.12,17.93],[72.82,20.42],[71.18,20.76],[69.16,22.09],[69.35,22.84],[68.84,24.36],[70.84,25.22],[70.17,26.49],[70.62,27.99],[72.82,28.96],[74.42,30.98],[75.26,32.27],[74.1,33.44],[74.24,34.75],[76.87,34.65],[78.91,34.32],[79.21,32.99],[78.46,32.62],[79.72,30.88],[80.48,29.73],[81.06,28.42],[83.3,27.36],[85.25,26.73],[87.23,26.4],[88.17,26.81],[88.12,27.88],[88.81,27.3],[89.74,26.72],[91.22,26.81],[92.1,27.45],[92.5,27.9],[94.57,29.28],[96.12,29.45],[96.25,28.41]]]},{"n":"Bangladesh","p":[[[92.67,22.04],[92.3,21.48],[92.08,21.19],[91.83,22.18],[90.5,22.81],[90.27,21.84],[89.7,21.86],[89.03,22.06],[88.53,23.63],[88.08,24.5],[88.93,25.24],[88.56,26.45],[89.83,25.97],[90.87,25.13],[92.38,24.98],[91.47,24.07],[91.71,22.99],[92.15,23.63]]]},{"n":"Bhutan","p":[[[91.7,27.77],[92.03,26.84],[90.37,26.88],[88.84,27.1],[89.48,28.04],[90.73,28.06],[91.7,27.77]]]},{"n":"Nepal","p":[[[88.12,27.88],[88.17,26.81],[87.23,26.4],[85.25,26.73],[83.3,27.36],[81.06,28.42],[80.48,29.73],[81.53,30.42],[83.34,29.46],[84.23,28.84],[85.82,28.2],[88.12,27.88]]]},{"n":"Pakistan","p":[[[77.84,35.49],[75.76,34.5],[73.75,34.32],[74.45,32.76],[74.41,31.69],[73.45,29.98],[71.78,27.91],[69.51,26.94],[70.28,25.72],[71.04,24.36],[68.18,23.69],[67.15,24.66],[64.53,25.24],[61.5,25.08],[63.32,26.76],[62.76,27.38],[61.77,28.7],[60.87,29.83],[63.55,29.47],[64.35,29.56],[66.35,29.89],[66.94,31.3],[67.79,31.58],[68.93,31.62],[69.26,32.5],[70.32,33.36],[70.88,33.99],[71.12,34.73],[71.5,35.65],[71.85,36.51],[74.07,36.84],[75.16,37.13],[76.19,35.9]]]},{"n":"Afghanistan","p":[[[66.52,37.36],[67.83,37.14],[68.86,37.34],[69.52,37.61],[70.27,37.74],[70.81,38.49],[71.24,37.95],[71.45,37.07],[72.19,36.95],[73.26,37.5],[74.98,37.42],[74.58,37.02],[72.92,36.72],[71.26,36.07],[71.61,35.15],[71.16,34.35],[69.93,34.02],[69.69,33.11],[69.32,31.9],[68.56,31.71],[67.68,31.3],[66.38,30.74],[65.05,29.47],[64.15,29.34],[62.55,29.32],[61.78,30.74],[60.94,31.55],[60.54,32.98],[60.53,33.68],[61.21,35.65],[62.98,35.4],[63.98,36.01],[64.75,37.11],[65.75,37.66],[66.52,37.36]]]},{"n":"Tajikistan","p":[[[67.83,37.14],[68.18,38.9],[67.7,39.58],[69.01,40.09],[70.67,40.96],[70.6,40.22],[70.65,39.94],[69.46,39.53],[71.78,39.28],[73.93,38.51],[74.86,38.38],[74.98,37.42],[73.26,37.5],[72.19,36.95],[71.45,37.07],[71.24,37.95],[70.81,38.49],[70.27,37.74],[69.52,37.61],[68.86,37.34],[67.83,37.14]]]},{"n":"Kyrgyzstan","p":[[[70.96,42.27],[71.84,42.85],[73.65,43.09],[75.64,42.88],[77.66,42.96],[79.64,42.5],[80.12,42.12],[78.19,41.19],[76.53,40.43],[74.78,40.37],[73.96,39.66],[71.78,39.28],[69.46,39.53],[70.65,39.94],[71.77,40.15],[71.87,41.39],[70.42,41.52],[70.96,42.27]]]},{"n":"Turkmenistan","p":[[[52.5,41.78],[54.08,42.32],[55.46,41.26],[57.1,41.32],[57.79,42.17],[59.98,42.22],[60.47,41.22],[61.88,41.08],[63.52,39.36],[65.22,38.4],[66.52,37.36],[65.75,37.66],[64.75,37.11],[63.98,36.01],[62.98,35.4],[61.21,35.65],[60.38,36.53],[58.44,37.52],[56.62,38.12],[55.51,37.96],[53.92,37.2],[53.88,38.95],[53.36,39.98],[52.92,40.88],[54.74,40.95],[53.72,42.12],[52.81,41.14]]]},{"n":"Iran","p":[[[48.57,29.93],[48.0,30.99],[47.85,31.71],[46.11,33.02],[45.65,34.75],[46.08,35.68],[44.77,37.17],[44.23,37.97],[44.11,39.43],[44.95,39.34],[46.14,38.74],[47.69,39.51],[48.36,39.29],[48.63,38.27],[49.2,37.58],[50.84,36.87],[53.83,36.97],[54.8,37.39],[56.18,37.94],[57.33,38.03],[59.23,37.41],[61.12,36.49],[60.8,34.4],[60.96,33.53],[60.86,32.18],[61.7,31.38],[60.87,29.83],[61.77,28.7],[62.76,27.38],[63.32,26.76],[61.5,25.08],[58.53,25.61],[56.97,26.97],[55.72,26.96],[53.49,26.81],[51.52,27.87],[50.12,30.15],[48.94,30.32]]]},{"n":"Syria","p":[[[35.72,32.71],[35.84,32.87],[36.07,33.82],[36.45,34.59],[35.91,35.41],[36.42,36.04],[36.74,36.82],[38.17,36.9],[39.52,36.72],[41.21,37.07],[41.84,36.61],[41.38,35.63],[38.79,33.38],[35.72,32.71]]]},{"n":"Armenia","p":[[[46.51,38.77],[45.74,39.32],[45.3,39.47],[44.79,39.71],[43.66,40.25],[43.58,41.09],[45.18,40.99],[45.36,40.56],[45.61,39.9],[46.48,39.46]]]},{"n":"Sweden","p":[[[11.03,58.86],[12.3,60.12],[11.99,61.8],[12.58,64.07],[13.92,64.45],[15.11,66.19],[16.77,68.01],[17.99,68.57],[20.03,69.07],[21.98,68.62],[23.57,66.4],[22.18,65.72],[21.37,64.41],[17.85,62.75],[17.83,60.64],[17.87,58.95],[16.45,57.04],[14.67,56.2],[12.94,55.36],[11.79,57.44]]]},{"n":"Belarus","p":[[[28.18,56.17],[29.37,55.67],[30.87,55.55],[30.76,54.81],[31.79,53.97],[32.41,53.62],[32.3,53.13],[31.31,53.07],[31.79,52.1],[30.93,52.04],[30.56,51.32],[29.25,51.37],[28.62,51.43],[27.45,51.59],[25.33,51.91],[24.01,51.62],[23.51,52.02],[23.8,52.69],[23.53,53.47],[24.45,53.91],[25.77,54.85],[26.49,55.62],[28.18,56.17]]]},{"n":"Ukraine","p":[[[31.79,52.1],[32.41,52.29],[33.75,52.34],[34.14,51.57],[35.02,51.21],[35.36,50.58],[37.39,50.38],[38.59,49.93],[40.08,49.31],[39.9,48.23],[38.77,47.83],[38.22,47.1],[36.76,46.7],[34.96,46.27],[34.86,45.77],[34.41,46.01],[33.44,45.97],[31.74,46.33],[30.75,46.58],[29.6,45.29],[28.68,45.3],[28.49,45.6],[28.93,46.26],[29.07,46.52],[29.76,46.35],[29.84,46.53],[29.56,46.93],[29.05,47.51],[28.67,48.12],[27.52,48.47],[26.62,48.22],[25.95,47.99],[24.87,47.74],[23.76,47.99],[22.71,47.88],[22.09,48.42],[22.56,49.09],[22.52,49.48],[23.92,50.42],[23.53,51.58],[24.55,51.89],[26.34,51.83],[28.24,51.57],[28.99,51.6],[30.16,51.42],[30.62,51.82],[31.79,52.1]]]},{"n":"Poland","p":[[[23.48,53.91],[23.8,53.09],[23.2,52.49],[23.53,51.58],[23.92,50.42],[22.52,49.48],[22.56,49.09],[20.89,49.33],[19.83,49.22],[18.91,49.44],[18.39,49.99],[17.55,50.36],[16.72,50.22],[16.24,50.7],[15.02,51.11],[14.69,52.09],[14.07,52.98],[14.12,53.76],[16.36,54.51],[18.62,54.68],[19.66,54.43],[22.73,54.33],[23.48,53.91]]]},{"n":"Austria","p":[[[16.98,48.12],[16.34,47.71],[16.2,46.85],[15.14,46.66],[13.81,46.51],[12.15,47.12],[11.05,46.75],[9.93,46.92],[9.63,47.35],[9.9,47.58],[10.54,47.57],[12.14,47.7],[12.93,47.47],[12.88,48.29],[13.6,48.88],[14.9,48.96],[16.03,48.73],[16.96,48.6],[16.98,48.12]]]},{"n":"Hungary","p":[[[22.09,48.42],[22.71,47.88],[21.63,46.99],[20.22,46.13],[18.83,45.91],[18.46,45.76],[16.88,46.38],[16.37,46.84],[16.53,47.5],[16.9,47.71],[17.49,47.87],[18.7,47.88],[19.17,48.11],[19.77,48.2],[20.47,48.56],[21.87,48.32]]]},{"n":"Moldova","p":[[[26.62,48.22],[27.52,48.47],[28.67,48.12],[29.05,47.51],[29.56,46.93],[29.84,46.53],[29.76,46.35],[29.07,46.52],[28.93,46.26],[28.49,45.6],[28.05,45.94],[28.13,46.81],[27.23,47.83],[26.62,48.22]]]},{"n":"Romania","p":[[[28.23,45.49],[29.15,45.46],[29.63,45.04],[28.84,44.91],[27.97,43.81],[26.07,43.94],[24.1,43.74],[22.94,43.82],[22.47,44.41],[22.46,44.7],[21.56,44.77],[20.87,45.42],[20.22,46.13],[21.63,46.99],[22.71,47.88],[23.76,47.99],[24.87,47.74],[25.95,47.99],[26.62,48.22],[27.23,47.83],[28.13,46.81],[28.05,45.94]]]},{"n":"Lithuania","p":[[[26.49,55.62],[25.77,54.85],[24.45,53.91],[23.24,54.22],[22.65,54.58],[22.32,55.02],[21.06,56.03],[23.88,56.27],[25.0,56.16],[26.49,55.62]]]},{"n":"Latvia","p":[[[27.29,57.47],[27.86,56.76],[27.1,55.78],[25.53,56.1],[24.86,56.37],[22.2,56.34],[21.09,56.78],[22.52,57.75],[24.12,57.03],[25.16,57.97],[26.46,57.48]]]},{"n":"Estonia","p":[[[27.98,59.48],[28.13,59.3],[27.72,57.79],[26.46,57.48],[25.16,57.97],[24.43,58.38],[23.43,58.61],[24.6,59.47],[26.95,59.45],[27.98,59.48]]]},{"n":"Germany","p":[[[14.12,53.76],[14.07,52.98],[14.69,52.09],[15.02,51.11],[14.31,51.12],[13.34,50.73],[12.24,50.27],[12.52,49.55],[13.6,48.88],[12.88,48.29],[12.93,47.47],[12.14,47.7],[10.54,47.57],[9.9,47.58],[8.52,47.83],[7.47,47.62],[8.1,49.02],[6.19,49.46],[6.04,50.13],[5.99,51.85],[6.84,52.23],[6.91,53.48],[7.94,53.75],[8.8,54.02],[8.53,54.96],[9.92,54.98],[10.95,54.36],[11.96,54.2],[13.65,54.08]]]},{"n":"Bulgaria","p":[[[22.66,44.23],[23.33,43.9],[25.57,43.69],[27.24,44.18],[28.56,43.71],[27.67,42.58],[27.14,42.14],[26.11,41.33],[24.49,41.58],[22.95,41.34],[22.38,42.32],[22.44,42.58],[22.99,43.21],[22.41,44.01]]]},{"n":"Greece","p":[[[26.29,35.3],[24.72,34.92],[23.51,35.28],[24.25,35.37],[25.77,35.35],[26.29,35.3]],[[22.95,41.34],[24.49,41.58],[26.11,41.33],[26.6,41.56],[26.06,40.82],[24.93,40.95],[24.41,40.12],[23.34,39.96],[22.63,40.26],[23.35,39.19],[23.53,38.51],[24.04,37.66],[23.41,37.41],[23.15,36.42],[21.67,36.84],[21.12,38.31],[20.22,39.34],[20.61,40.11],[21.0,40.58],[21.67,40.93],[22.6,41.13],[22.95,41.34]]]},{"n":"Turkey","p":[[[44.77,37.17],[43.94,37.26],[42.35,37.23],[40.67,37.09],[38.7,36.71],[37.07,36.62],[36.69,36.26],[36.15,35.82],[36.16,36.65],[34.71,36.8],[32.51,36.11],[30.62,36.68],[29.7,36.14],[27.64,36.66],[26.32,38.21],[26.17,39.46],[28.82,40.46],[31.15,41.09],[33.51,42.02],[36.91,41.34],[39.51,41.1],[41.55,41.54],[43.58,41.09],[43.66,40.25],[44.79,39.71],[44.42,38.28],[44.77,37.17]],[[26.12,41.83],[28.0,42.01],[28.99,41.3],[27.62,41.0],[26.36,40.15],[26.06,40.82],[26.6,41.56]]]},{"n":"Albania","p":[[[21.02,40.84],[20.67,40.44],[20.15,39.62],[19.96,39.92],[19.32,40.73],[19.54,41.72],[19.37,41.88],[19.74,42.69],[20.07,42.59],[20.52,42.22],[20.59,41.86],[20.61,41.09]]]},{"n":"Croatia","p":[[[16.56,46.5],[17.63,45.95],[18.83,45.91],[19.39,45.24],[18.55,45.08],[17.0,45.23],[16.32,45.0],[15.75,44.82],[16.46,44.04],[17.3,43.45],[18.56,42.65],[18.45,42.48],[16.93,43.21],[15.17,44.24],[14.92,44.74],[14.26,45.23],[13.66,45.14],[13.72,45.5],[14.6,45.63],[15.33,45.45],[15.67,45.83],[16.56,46.5]]]},{"n":"Switzerland","p":[[[9.59,47.53],[9.48,47.1],[10.44,46.89],[9.92,46.31],[8.97,46.04],[8.32,46.16],[7.27,45.78],[6.5,46.43],[6.04,46.73],[6.74,47.54],[7.47,47.62],[8.52,47.83]]]},{"n":"Luxembourg","p":[[[6.04,50.13],[6.19,49.46],[5.67,49.53],[6.04,50.13]]]},{"n":"Belgium","p":[[[6.16,50.8],[5.78,50.09],[4.8,49.99],[3.59,50.38],[2.66,50.8],[3.31,51.35],[3.31,51.35],[4.97,51.48],[6.16,50.8]]]},{"n":"Netherlands","p":[[[6.91,53.48],[6.84,52.23],[5.99,51.85],[5.61,51.04],[4.05,51.27],[3.32,51.35],[4.71,53.09],[6.91,53.48]]]},{"n":"Portugal","p":[[[-9.03,41.88],[-8.26,42.28],[-7.42,41.79],[-6.67,41.88],[-6.85,41.11],[-7.03,40.18],[-7.5,39.63],[-7.37,38.37],[-7.17,37.8],[-7.45,37.1],[-8.38,36.98],[-8.75,37.65],[-9.29,38.36],[-9.45,39.39],[-8.98,40.16],[-8.79,41.18],[-9.03,41.88]]]},{"n":"Spain","p":[[[-7.45,37.1],[-7.17,37.8],[-7.37,38.37],[-7.5,39.63],[-7.03,40.18],[-6.85,41.11],[-6.67,41.88],[-7.42,41.79],[-8.26,42.28],[-9.03,41.88],[-9.39,43.03],[-6.75,43.57],[-4.35,43.4],[-1.9,43.42],[0.34,42.58],[1.83,42.34],[3.04,41.89],[0.81,41.01],[0.11,40.12],[0.11,38.74],[-0.68,37.64],[-2.15,36.67],[-4.37,36.68],[-5.38,35.95],[-6.24,36.37],[-7.45,37.1]]]},{"n":"Ireland","p":[[[-6.2,53.87],[-6.79,52.26],[-9.98,51.82],[-9.69,53.88],[-7.57,55.13],[-7.57,54.06],[-6.2,53.87]]]},{"n":"New Caledonia","p":[[[165.78,-21.08],[167.12,-22.16],[166.19,-22.13],[164.83,-21.15],[164.03,-20.11],[165.02,-20.46],[165.78,-21.08]]]},{"n":"Solomon Is.","p":[[[161.68,-9.6],[160.79,-8.92],[160.92,-8.32],[161.68,-9.6]],[[160.85,-9.87],[159.85,-9.79],[159.7,-9.24],[160.69,-9.61]],[[159.64,-8.02],[159.92,-8.54],[158.59,-7.75],[158.36,-7.32],[159.64,-8.02]],[[157.14,-7.02],[157.34,-7.4],[156.49,-6.77],[157.14,-7.02]]]},{"n":"New Zealand","p":[[[176.89,-40.07],[176.01,-41.29],[175.07,-41.43],[175.23,-40.46],[173.82,-39.51],[174.57,-38.8],[174.7,-37.38],[174.32,-36.53],[173.05,-35.24],[173.01,-34.45],[174.33,-35.27],[175.34,-37.21],[175.81,-36.8],[176.76,-37.88],[178.01,-37.58],[178.27,-38.58],[177.21,-39.15],[177.03,-39.88]],[[169.67,-43.56],[171.13,-42.51],[171.95,-41.51],[172.8,-40.49],[173.25,-41.33],[174.25,-41.35],[173.88,-42.23],[172.71,-43.37],[172.31,-43.87],[171.19,-44.9],[169.83,-46.36],[168.41,-46.62],[166.68,-46.22],[167.05,-45.11],[168.95,-43.94]]]},{"n":"Australia","p":[[[147.69,-40.81],[148.36,-42.06],[147.91,-43.21],[146.87,-43.63],[146.05,-43.55],[145.3,-42.03],[144.74,-40.7],[146.36,-41.14],[147.69,-40.81]],[[126.15,-32.22],[124.22,-32.96],[123.66,-33.89],[122.18,-34.0],[120.58,-33.93],[119.3,-34.51],[118.51,-34.75],[117.3,-35.03],[115.56,-34.39],[115.05,-33.62],[115.71,-33.26],[115.8,-32.21],[115.16,-30.6],[115.04,-29.46],[114.62,-28.52],[114.05,-27.33],[113.34,-26.12],[113.44,-25.62],[114.23,-26.3],[113.72,-25.0],[113.39,-24.38],[113.71,-23.56],[113.74,-22.48],[114.23,-22.52],[115.46,-21.5],[116.71,-20.7],[117.44,-20.75],[118.84,-20.26],[119.25,-19.95],[120.86,-19.68],[121.66,-18.71],[122.29,-17.8],[123.01,-16.41],[123.86,-17.07],[123.82,-16.11],[124.38,-15.57],[125.17,-14.68],[125.69,-14.23],[126.14,-14.1],[127.07,-13.82],[128.36,-14.87],[129.62,-14.97],[129.89,-13.62],[130.18,-13.11],[131.22,-12.18],[132.58,-12.11],[131.82,-11.27],[133.02,-11.38],[134.39,-12.04],[135.3,-12.25],[136.26,-12.05],[136.95,-12.35],[136.31,-13.29],[136.08,-13.72],[135.43,-14.72],[136.3,-15.55],[137.58,-16.22],[138.59,-16.81],[139.26,-17.37],[140.88,-17.37],[141.27,-16.39],[141.7,-15.04],[141.64,-14.27],[141.65,-12.94],[141.69,-12.41],[142.12,-11.33],[142.52,-10.67],[142.87,-11.78],[143.16,-12.33],[143.6,-13.4],[143.92,-14.55],[144.89,-14.59],[145.27,-15.43],[145.64,-16.78],[146.16,-17.76],[146.39,-18.96],[148.18,-19.96],[148.72,-20.63],[149.68,-22.34],[150.48,-22.56],[150.9,-23.46],[152.07,-24.46],[153.14,-26.07],[153.09,-27.26],[153.51,-29.0],[153.07,-30.35],[152.89,-31.64],[151.71,-33.04],[151.01,-34.31],[150.33,-35.67],[149.95,-37.11],[149.42,-37.77],[147.38,-38.22],[146.32,-39.04],[144.88,-38.42],[144.49,-38.09],[142.75,-38.54],[141.61,-38.31],[139.99,-37.4],[139.57,-36.14],[138.12,-35.61],[138.21,-34.38],[136.83,-35.26],[137.5,-34.13],[137.81,-32.9],[136.37,-34.09],[135.21,-34.48],[134.61,-33.22],[134.27,-32.62],[132.29,-31.98],[129.54,-31.59],[127.1,-32.28]]]},{"n":"Sri Lanka","p":[[[81.79,7.52],[81.22,6.2],[79.87,6.76],[80.15,9.82],[81.3,8.56]]]},{"n":"China","p":[[[109.48,18.2],[108.63,19.37],[110.21,20.1],[111.01,19.7],[110.34,18.68]],[[80.26,42.35],[80.87,43.18],[81.95,45.32],[83.18,47.33],[85.72,47.45],[86.6,48.55],[87.75,49.3],[88.85,48.07],[90.97,46.89],[90.95,45.29],[93.48,44.98],[95.31,44.24],[96.35,42.73],[99.52,42.52],[101.83,42.51],[104.52,41.91],[106.13,42.13],[109.24,42.52],[111.13,43.41],[111.67,44.07],[111.87,45.1],[113.46,44.81],[115.99,45.73],[117.42,46.67],[119.66,46.69],[118.87,47.75],[117.3,47.7],[115.74,47.73],[116.19,49.13],[117.88,49.51],[119.28,50.58],[120.74,51.96],[120.18,52.75],[122.25,53.43],[125.07,53.16],[126.56,51.78],[127.29,50.74],[129.4,49.44],[130.99,47.79],[133.37,48.18],[134.5,47.58],[133.77,46.12],[131.88,45.32],[131.29,44.11],[130.63,42.9],[129.99,42.99],[128.05,41.99],[127.34,41.5],[126.18,41.11],[124.27,39.93],[122.13,39.17],[121.59,39.36],[122.17,40.42],[120.77,40.59],[119.02,39.25],[117.53,38.74],[118.88,37.9],[119.7,37.16],[121.71,37.48],[122.52,36.93],[120.64,36.11],[119.15,34.91],[120.62,33.38],[121.91,31.69],[121.26,30.68],[122.09,29.83],[121.68,28.23],[120.4,27.05],[118.66,24.55],[115.89,22.78],[114.15,22.22],[113.24,22.05],[110.79,21.4],[109.89,20.28],[109.86,21.4],[108.05,21.55],[106.57,22.22],[105.81,22.98],[104.48,22.82],[102.71,22.71],[101.65,22.32],[101.27,21.2],[101.15,21.85],[99.98,21.74],[99.53,22.95],[98.66,24.06],[97.72,25.08],[98.71,26.74],[98.25,27.75],[97.33,28.26],[96.59,28.83],[95.4,29.03],[93.41,28.64],[91.7,27.77],[90.73,28.06],[89.48,28.04],[88.73,28.09],[86.95,27.97],[85.01,28.64],[83.9,29.32],[82.33,30.12],[81.11,30.18],[78.74,31.52],[79.18,32.48],[78.81,33.51],[77.84,35.49],[75.9,36.67],[74.98,37.42],[74.86,38.38],[73.93,38.51],[73.96,39.66],[74.78,40.37],[76.53,40.43],[78.19,41.19],[80.12,42.12]]]},{"n":"Taiwan","p":[[[121.78,24.39],[120.75,21.97],[120.11,23.56],[121.5,25.3],[121.78,24.39]]]},{"n":"Italy","p":[[[10.44,46.89],[11.16,46.94],[12.38,46.77],[13.7,46.02],[13.14,45.74],[12.38,44.89],[12.59,44.09],[14.03,42.76],[15.93,41.96],[15.89,41.54],[17.52,40.88],[18.48,40.17],[17.74,40.28],[16.45,39.8],[17.05,38.9],[16.1,37.99],[15.69,38.21],[16.11,38.96],[15.41,40.05],[14.7,40.6],[13.63,41.19],[12.11,41.7],[10.51,42.93],[9.7,44.04],[8.43,44.23],[7.44,43.69],[7.01,44.25],[7.1,45.33],[6.84,45.99],[7.76,45.82],[8.49,46.01],[9.18,46.44],[10.36,46.48]],[[14.76,38.14],[15.16,37.44],[15.1,36.62],[13.83,37.1],[12.57,38.13],[14.76,38.14]],[[8.71,40.9],[9.81,40.5],[9.21,39.24],[8.43,39.17],[8.16,40.95]]]},{"n":"Denmark","p":[[[9.92,54.98],[8.53,54.96],[8.09,56.54],[8.54,57.11],[9.78,57.45],[10.55,57.22],[10.37,56.61],[10.67,56.08],[9.65,55.47]]]},{"n":"United Kingdom","p":[[[-6.2,53.87],[-7.57,54.06],[-7.57,55.13],[-5.66,54.55]],[[-3.09,53.4],[-2.95,53.98],[-3.63,54.62],[-5.08,55.06],[-5.05,55.78],[-5.64,56.28],[-5.79,57.82],[-4.21,58.55],[-4.07,57.55],[-1.96,57.68],[-3.12,55.97],[-2.01,55.8],[-0.43,54.46],[0.47,52.93],[1.56,52.1],[1.45,51.29],[-0.79,50.77],[-2.96,50.7],[-4.54,50.34],[-5.78,50.16],[-3.41,51.43],[-4.98,51.59],[-4.22,52.3],[-4.58,53.5]]]},{"n":"Iceland","p":[[[-14.51,66.46],[-13.61,65.13],[-17.79,63.68],[-19.97,63.64],[-21.78,64.4],[-22.18,65.08],[-24.33,65.61],[-22.13,66.41],[-19.06,66.28],[-16.17,66.53]]]},{"n":"Azerbaijan","p":[[[46.4,41.86],[47.37,41.22],[47.99,41.41],[49.11,41.28],[50.08,40.53],[49.57,40.18],[49.22,39.05],[48.88,38.32],[48.01,38.79],[48.06,39.58],[46.51,38.77],[46.03,39.63],[45.89,40.22],[45.56,40.81],[44.97,41.25],[45.96,41.12],[46.64,41.18],[46.4,41.86]],[[46.14,38.74],[44.95,39.34],[45.0,39.74],[45.74,39.47],[46.14,38.74]]]},{"n":"Georgia","p":[[[39.96,43.43],[40.92,43.38],[43.76,42.74],[44.54,42.71],[45.78,42.09],[46.15,41.72],[46.5,41.06],[45.22,41.41],[43.58,41.09],[41.55,41.54],[41.45,42.65],[40.32,43.13]]]},{"n":"Philippines","p":[[[122.59,9.98],[122.95,10.88],[123.34,10.27],[123.98,10.28],[123.31,9.32],[122.38,9.71]],[[126.38,8.41],[126.54,7.19],[125.83,7.29],[125.68,6.05],[124.22,6.16],[124.24,7.36],[123.3,7.42],[122.09,6.9],[122.31,8.03],[123.49,8.69],[124.6,8.51],[125.47,8.99],[126.22,9.29],[126.38,8.41]],[[118.5,9.32],[117.66,9.07],[118.99,10.38],[119.69,10.55],[118.5,9.32]],[[122.34,18.22],[122.52,17.09],[121.66,15.93],[121.73,14.33],[122.7,14.34],[123.86,13.24],[124.08,12.54],[122.93,13.55],[122.03,13.78],[120.63,13.86],[120.99,14.53],[120.56,14.4],[119.92,15.41],[120.29,16.03],[120.72,18.51],[121.94,18.22],[122.34,18.22]],[[122.04,11.42],[122.48,11.58],[123.1,11.17],[122.0,10.44],[122.04,11.42]],[[125.5,12.16],[125.01,11.31],[125.28,10.36],[124.76,10.84],[124.3,11.5],[124.88,11.79],[125.23,12.54]]]},{"n":"Malaysia","p":[[[100.09,6.46],[101.08,6.2],[101.81,5.81],[102.37,6.13],[103.38,4.86],[103.33,3.73],[103.5,2.79],[104.25,1.63],[103.52,1.23],[101.39,2.76],[100.7,3.94],[100.2,5.31],[100.09,6.46]],[[117.88,4.14],[115.87,4.31],[115.13,2.82],[113.81,1.22],[112.38,1.41],[111.16,0.98],[109.83,1.34],[110.4,1.66],[111.37,2.7],[113.0,3.1],[114.2,4.53],[114.87,4.35],[115.41,4.96],[116.22,6.14],[117.13,6.93],[117.69,5.99],[119.18,5.41],[118.44,4.97],[117.88,4.14]]]},{"n":"Brunei","p":[[[115.45,5.45],[115.35,4.32],[114.66,4.01],[114.6,4.9]]]},{"n":"Slovenia","p":[[[13.81,46.51],[15.14,46.66],[16.2,46.85],[16.56,46.5],[15.67,45.83],[15.33,45.45],[14.6,45.63],[13.72,45.5],[13.7,46.02]]]},{"n":"Finland","p":[[[28.59,69.06],[29.98,67.7],[30.22,65.81],[30.44,64.2],[31.52,62.87],[30.21,61.78],[28.07,60.5],[26.26,60.42],[22.87,59.85],[21.32,60.72],[21.06,62.61],[22.44,63.82],[25.4,65.11],[23.9,66.01],[23.54,67.94],[20.65,69.11],[22.36,68.84],[24.74,68.65],[26.18,69.83],[29.02,69.77]]]},{"n":"Slovakia","p":[[[22.56,49.09],[22.09,48.42],[20.8,48.62],[20.24,48.33],[19.66,48.27],[18.78,48.08],[17.86,47.76],[16.98,48.12],[16.96,48.6],[17.55,48.8],[17.91,49.0],[18.17,49.27],[18.55,49.5],[18.91,49.44],[19.83,49.22],[20.89,49.33],[22.56,49.09]]]},{"n":"Czechia","p":[[[15.02,51.11],[16.24,50.7],[16.72,50.22],[17.55,50.36],[18.39,49.99],[18.55,49.5],[18.17,49.27],[17.91,49.0],[17.55,48.8],[16.96,48.6],[16.03,48.73],[14.9,48.96],[13.6,48.88],[12.52,49.55],[12.24,50.27],[13.34,50.73],[14.31,51.12],[15.02,51.11]]]},{"n":"Eritrea","p":[[[36.43,14.42],[36.75,16.29],[37.17,17.26],[38.41,18.0],[39.27,15.92],[41.18,14.49],[42.28,13.34],[43.08,12.7],[42.35,12.54],[41.6,13.45],[40.9,14.12],[39.34,14.53],[38.51,14.51],[37.59,14.21]]]},{"n":"Japan","p":[[[141.88,39.18],[140.98,37.14],[140.77,35.84],[138.98,34.67],[135.79,33.46],[135.08,34.6],[132.16,33.9],[132.0,33.15],[130.69,31.03],[130.45,32.32],[129.41,33.3],[130.88,34.23],[132.62,35.43],[135.68,35.53],[137.39,36.83],[139.43,38.22],[139.88,40.56],[141.37,41.38],[141.88,39.18]],[[144.61,43.96],[145.54,43.26],[143.18,42.0],[141.07,41.58],[139.82,42.56],[141.38,43.39],[141.97,45.55],[143.91,44.17]],[[132.37,33.46],[133.49,33.94],[134.64,34.15],[134.2,33.2],[133.28,33.29],[132.36,32.99]]]},{"n":"Paraguay","p":[[[-58.17,-20.18],[-57.94,-22.09],[-56.47,-22.09],[-55.61,-22.66],[-55.4,-23.96],[-54.65,-23.84],[-54.29,-24.57],[-54.63,-25.74],[-55.7,-27.39],[-57.61,-27.4],[-57.63,-25.6],[-58.81,-24.77],[-60.85,-23.88],[-62.29,-21.05],[-61.79,-19.63],[-59.12,-19.36],[-58.17,-20.18]]]},{"n":"Yemen","p":[[[52.0,19.0],[53.11,16.65],[52.19,15.94],[51.17,15.18],[48.68,14.0],[47.94,14.01],[46.72,13.4],[45.63,13.29],[45.14,12.95],[44.49,12.72],[43.48,12.64],[43.25,13.77],[42.89,14.8],[42.81,15.26],[42.82,15.91],[43.22,16.67],[43.38,17.58],[44.06,17.41],[45.4,17.33],[46.75,17.28],[47.47,17.12],[49.12,18.62]]]},{"n":"Saudi Arabia","p":[[[34.96,29.36],[36.5,29.51],[37.5,30.0],[38.0,30.51],[39.0,32.01],[40.4,31.89],[44.71,29.18],[47.46,29.0],[48.42,28.55],[49.3,27.46],[50.15,26.69],[50.11,25.94],[50.53,25.33],[50.81,24.75],[51.39,24.63],[51.62,24.01],[55.01,22.5],[55.67,22.0],[52.0,19.0],[48.18,18.17],[47.0,16.95],[46.37,17.23],[45.22,17.43],[43.79,17.32],[43.12,17.09],[42.78,16.35],[42.35,17.08],[41.75,17.83],[40.94,19.49],[39.8,20.34],[39.02,21.99],[38.49,23.69],[37.48,24.29],[37.21,25.08],[36.64,25.83],[35.64,27.38],[34.63,28.06],[34.83,28.96]]]},{"n":"Antarctica","p":[[[-48.66,-78.05],[-46.66,-77.83],[-43.92,-78.48],[-43.37,-79.52],[-44.88,-80.34],[-48.39,-80.83],[-52.85,-80.97],[-53.99,-80.22],[-50.99,-79.61],[-49.91,-78.81],[-48.66,-78.05]],[[-66.29,-80.26],[-61.88,-80.39],[-60.61,-79.63],[-59.87,-80.55],[-62.26,-80.86],[-65.74,-80.59],[-66.29,-80.26]],[[-73.92,-71.27],[-73.23,-71.15],[-71.78,-70.68],[-71.74,-69.51],[-70.25,-68.88],[-69.49,-69.62],[-68.73,-70.51],[-68.33,-71.41],[-68.78,-72.17],[-71.08,-72.5],[-71.9,-72.09],[-74.19,-72.37],[-75.01,-71.66]],[[-102.33,-71.89],[-101.7,-71.72],[-98.98,-71.93],[-96.79,-71.95],[-96.98,-72.44],[-99.43,-72.44],[-101.8,-72.31]],[[-122.62,-73.66],[-122.41,-73.32],[-119.92,-73.66],[-119.29,-73.83],[-121.62,-74.01]],[[-127.28,-73.46],[-126.56,-73.25],[-124.03,-73.87],[-125.91,-73.74]],[[-163.71,-78.6],[-163.11,-78.22],[-160.25,-78.69],[-159.21,-79.5],[-162.44,-79.28],[-163.07,-78.87]],[[180,-84.71],[-180,-90],[-179.94,-84.72],[-177.26,-84.45],[-176.08,-84.1],[-175.83,-84.12],[-173.12,-84.12],[-169.95,-83.88],[-168.53,-84.24],[-164.18,-84.83],[-158.07,-85.37],[-150.94,-85.3],[-145.89,-85.32],[-142.89,-84.57],[-150.06,-84.3],[-153.59,-83.69],[-153.04,-82.83],[-152.86,-82.04],[-155.29,-81.42],[-154.41,-81.16],[-150.65,-81.34],[-147.22,-80.67],[-146.77,-79.93],[-149.53,-79.36],[-153.39,-79.16],[-155.98,-78.69],[-158.05,-78.03],[-157.88,-76.99],[-155.33,-77.2],[-152.92,-77.5],[-150.0,-77.18],[-147.61,-76.58],[-146.14,-76.11],[-146.2,-75.38],[-144.32,-75.54],[-141.64,-75.09],[-138.86,-74.97],[-136.43,-74.52],[-134.43,-74.36],[-132.26,-74.3],[-129.55,-74.46],[-126.89,-74.42],[-124.01,-74.48],[-121.07,-74.52],[-118.68,-74.19],[-116.22,-74.24],[-113.94,-73.71],[-112.95,-74.38],[-111.26,-74.42],[-108.71,-74.91],[-106.15,-75.13],[-103.37,-74.99],[-100.65,-75.3],[-100.76,-74.54],[-102.55,-74.11],[-103.33,-73.36],[-102.92,-72.75],[-100.31,-72.75],[-98.12,-73.21],[-96.34,-73.62],[-93.67,-73.28],[-91.42,-73.4],[-89.23,-72.56],[-87.27,-73.19],[-85.19,-73.48],[-82.67,-73.64],[-80.69,-73.48],[-79.3,-73.52],[-76.91,-73.64],[-74.89,-73.87],[-72.83,-73.4],[-70.21,-73.15],[-67.96,-72.79],[-67.13,-72.05],[-67.56,-71.25],[-68.23,-70.46],[-68.54,-69.72],[-67.98,-68.95],[-67.43,-68.15],[-67.74,-67.33],[-66.7,-66.58],[-65.37,-65.9],[-64.18,-65.17],[-63.0,-64.64],[-61.41,-64.27],[-59.89,-63.96],[-58.59,-63.39],[-57.22,-63.53],[-58.61,-64.15],[-59.79,-64.21],[-61.3,-64.54],[-62.51,-65.09],[-62.59,-65.86],[-62.81,-66.43],[-64.29,-66.84],[-65.51,-67.58],[-65.31,-68.37],[-63.96,-68.91],[-62.79,-69.62],[-62.28,-70.38],[-61.51,-71.09],[-61.08,-72.38],[-60.69,-73.17],[-61.38,-74.11],[-63.3,-74.58],[-64.35,-75.26],[-67.19,-75.79],[-69.8,-76.22],[-72.21,-76.67],[-75.56,-76.71],[-76.93,-77.1],[-74.28,-77.56],[-74.77,-78.22],[-77.93,-78.38],[-78.02,-79.18],[-76.63,-79.89],[-73.24,-80.42],[-70.01,-81.0],[-65.7,-81.47],[-61.55,-82.04],[-58.71,-82.85],[-57.01,-82.87],[-53.62,-82.26],[-49.76,-81.73],[-44.83,-81.85],[-42.16,-81.65],[-38.24,-81.34],[-34.39,-80.91],[-30.1,-80.59],[-29.25,-79.99],[-29.69,-79.26],[-33.68,-79.46],[-35.91,-79.08],[-35.33,-78.12],[-32.21,-77.65],[-29.78,-77.07],[-27.51,-76.5],[-25.47,-76.28],[-22.46,-76.11],[-20.01,-75.67],[-17.52,-75.13],[-15.7,-74.5],[-16.47,-73.87],[-15.45,-73.15],[-13.31,-72.72],[-11.51,-72.01],[-10.3,-71.27],[-8.61,-71.66],[-7.38,-71.32],[-5.79,-71.03],[-4.34,-71.46],[-1.8,-71.17],[-0.23,-71.64],[1.89,-71.13],[4.14,-70.85],[6.27,-70.46],[7.74,-69.89],[9.53,-70.01],[10.82,-70.83],[12.4,-70.25],[14.73,-70.03],[15.95,-70.03],[18.2,-69.87],[20.38,-70.01],[21.92,-70.4],[23.67,-70.52],[25.98,-70.48],[28.09,-70.32],[30.03,-69.93],[31.99,-69.66],[33.3,-68.84],[34.91,-68.66],[36.16,-69.25],[37.91,-69.52],[39.67,-69.54],[40.92,-68.93],[42.94,-68.46],[44.9,-68.05],[46.5,-67.6],[48.34,-67.37],[49.93,-67.11],[50.95,-66.52],[52.61,-66.05],[54.53,-65.82],[56.36,-65.97],[57.26,-66.68],[58.74,-67.29],[60.61,-67.68],[62.39,-68.01],[64.05,-67.41],[65.97,-67.74],[67.89,-67.93],[69.71,-68.97],[69.56,-69.68],[67.81,-70.31],[69.07,-70.68],[68.42,-71.44],[68.71,-72.17],[71.02,-72.09],[71.91,-71.32],[73.08,-70.72],[73.86,-69.87],[75.63,-69.74],[77.64,-69.46],[78.43,-68.7],[80.09,-68.07],[81.48,-67.54],[82.78,-67.21],[84.68,-67.21],[86.75,-67.15],[87.99,-66.21],[88.83,-66.95],[90.63,-67.23],[92.61,-67.19],[94.18,-67.11],[95.78,-67.39],[97.76,-67.25],[99.72,-67.25],[100.89,-66.58],[102.83,-65.56],[104.24,-65.97],[106.18,-66.93],[108.08,-66.95],[110.24,-66.7],[111.74,-66.13],[113.6,-65.88],[114.9,-66.39],[116.7,-66.66],[118.58,-67.17],[120.87,-67.19],[122.32,-66.56],[124.12,-66.62],[126.1,-66.56],[127.88,-66.66],[129.7,-66.58],[131.8,-66.39],[133.86,-66.29],[135.03,-65.72],[135.7,-65.58],[136.21,-66.45],[137.46,-66.95],[139.91,-66.88],[142.12,-66.82],[144.37,-66.84],[146.2,-67.23],[146.65,-67.9],[148.84,-68.39],[151.48,-68.72],[153.64,-68.89],[155.17,-68.84],[156.81,-69.38],[159.18,-69.6],[160.81,-70.23],[162.69,-70.74],[164.92,-70.78],[167.31,-70.83],[169.46,-71.21],[171.21,-71.7],[170.56,-72.44],[169.76,-73.24],[167.98,-73.81],[166.09,-74.38],[164.96,-75.15],[163.82,-75.87],[163.47,-76.69],[164.06,-77.46],[164.74,-78.18],[167.0,-78.75],[163.67,-79.12],[160.92,-79.73],[160.32,-80.57],[161.12,-81.28],[162.49,-82.06],[165.1,-82.71],[168.9,-83.34],[172.28,-84.04],[173.22,-84.41],[178.28,-84.47]]]},{"n":"N. Cyprus","p":[[[32.73,35.14],[32.95,35.39],[34.58,35.67],[33.97,35.06],[33.68,35.02],[33.48,35.0],[33.38,35.16],[32.92,35.09]]]},{"n":"Cyprus","p":[[[32.73,35.14],[33.19,35.17],[33.46,35.1],[33.53,35.04],[33.87,35.09],[34.0,34.98],[32.49,34.7],[32.73,35.14]]]},{"n":"Morocco","p":[[[-2.17,35.17],[-1.73,33.92],[-1.12,32.65],[-2.62,32.09],[-3.65,31.64],[-4.86,30.5],[-6.06,29.73],[-8.67,28.84],[-8.82,27.66],[-9.41,27.09],[-10.19,26.86],[-11.39,26.88],[-12.03,26.03],[-13.89,23.69],[-14.63,21.86],[-17.0,21.42],[-16.97,21.89],[-16.26,22.68],[-15.98,23.72],[-15.09,24.52],[-14.8,25.64],[-13.77,26.62],[-13.12,27.65],[-11.69,28.15],[-10.4,29.1],[-9.81,31.18],[-9.3,32.56],[-7.65,33.7],[-6.24,35.15],[-5.19,35.76],[-3.64,35.4],[-2.17,35.17]]]},{"n":"Egypt","p":[[[36.87,22],[29.02,22],[25,25.68],[24.7,30.04],[24.8,31.09],[26.5,31.59],[28.45,31.03],[29.68,31.19],[30.98,31.56],[31.96,30.93],[32.99,31.02],[34.27,31.22],[34.82,29.76],[34.64,29.1],[34.15,27.82],[33.59,27.97],[32.42,29.85],[32.73,28.71],[34.1,26.14],[34.8,25.03],[35.49,23.75],[36.69,22.2]]]},{"n":"Libya","p":[[[25,22],[23.85,20],[19.85,21.5],[14.85,22.86],[13.58,23.04],[11.56,24.1],[10.3,24.38],[9.91,25.37],[9.72,26.51],[9.76,27.69],[9.86,28.96],[9.48,30.31],[10.06,30.96],[10.64,31.76],[11.43,32.37],[12.66,32.79],[13.92,32.71],[15.71,31.38],[18.02,30.76],[19.57,30.53],[19.82,31.75],[20.85,32.71],[22.9,32.64],[23.61,32.19],[24.92,31.9],[24.8,31.09],[24.7,30.04],[25,25.68]]]},{"n":"Ethiopia","p":[[[47.79,8.0],[43.66,4.96],[42.13,4.23],[41.17,3.92],[39.85,3.84],[38.89,3.5],[38.44,3.59],[36.86,4.45],[35.82,4.78],[35.3,5.51],[34.25,6.83],[33.57,7.71],[33.29,8.35],[33.97,8.68],[34.26,10.63],[34.83,11.32],[35.86,12.58],[36.43,14.42],[37.91,14.96],[39.1,14.74],[40.03,14.52],[41.16,13.77],[42.01,12.87],[42,12.1],[41.74,11.36],[42.31,11.03],[42.78,10.93],[42.93,10.02],[43.68,9.18],[47.79,8.0]]]},{"n":"Djibouti","p":[[[42.35,12.54],[43.08,12.7],[43.29,11.97],[43.15,11.46],[42.55,11.11],[41.76,11.05],[41.66,11.63],[42.35,12.54]]]},{"n":"Somaliland","p":[[[48.95,11.41],[48.94,11.39],[48.94,9.97],[48.49,8.84],[46.95,8.0],[43.3,9.54],[42.56,10.57],[43.15,11.46],[43.67,10.86],[44.61,10.44],[46.65,10.82],[48.02,11.19],[48.95,11.41]]]},{"n":"Uganda","p":[[[33.9,-0.95],[30.77,-1.01],[29.82,-1.44],[29.59,-0.59],[29.88,0.6],[30.47,1.58],[31.17,2.2],[30.83,3.51],[31.25,3.78],[32.69,3.79],[34.01,4.25],[34.6,3.05],[34.67,1.18],[33.89,0.11]]]},{"n":"Rwanda","p":[[[30.42,-1.13],[30.76,-2.29],[30.47,-2.41],[29.63,-2.92],[29.12,-2.29],[29.29,-1.62],[29.82,-1.44]]]},{"n":"Bosnia and Herz.","p":[[[18.56,42.65],[17.3,43.45],[16.46,44.04],[15.75,44.82],[16.32,45.0],[17.0,45.23],[18.55,45.08],[19.01,44.86],[19.12,44.42],[19.45,43.57],[19.03,43.43],[18.56,42.65]]]},{"n":"North Macedonia","p":[[[22.38,42.32],[22.95,41.34],[22.6,41.13],[21.67,40.93],[20.61,41.09],[20.59,41.86],[20.72,41.85],[21.35,42.21],[21.92,42.3]]]},{"n":"Serbia","p":[[[18.83,45.91],[19.6,46.17],[20.76,45.73],[21.48,45.18],[22.15,44.48],[22.71,44.58],[22.66,44.23],[22.5,43.64],[22.6,42.9],[22.55,42.46],[21.92,42.3],[21.54,42.32],[21.78,42.68],[21.44,42.86],[21.14,43.07],[20.81,43.27],[20.5,42.88],[20.34,42.9],[19.63,43.21],[19.22,43.52],[19.6,44.04],[19.37,44.86],[19.01,44.86],[19.07,45.52]]]},{"n":"Montenegro","p":[[[20.07,42.59],[19.74,42.69],[19.37,41.88],[18.88,42.28],[18.56,42.65],[19.03,43.43],[19.48,43.35],[19.96,43.11],[20.26,42.81]]]},{"n":"Kosovo","p":[[[20.59,41.86],[20.28,42.32],[20.26,42.81],[20.64,43.22],[20.96,43.13],[21.27,42.91],[21.63,42.68],[21.66,42.44],[21.58,42.25],[20.76,42.05],[20.59,41.86]]]},{"n":"Trinidad and Tobago","p":[[[-61.68,10.76],[-60.9,10.86],[-61.77,10],[-61.66,10.37]]]},{"n":"S. Sudan","p":[[[30.83,3.51],[29.72,4.6],[28.7,4.46],[27.98,4.41],[27.21,5.55],[26.21,6.55],[25.12,7.5],[24.57,8.23],[24.19,8.73],[24.79,9.81],[25.79,10.41],[26.48,9.55],[27.11,9.64],[27.97,9.4],[29.0,9.6],[29.62,10.08],[30.84,9.71],[31.85,10.53],[32.31,11.68],[32.67,12.02],[33.21,12.18],[33.21,10.72],[33.84,9.98],[33.96,9.46],[33.83,8.38],[32.95,7.78],[34.08,7.23],[34.71,6.59],[34.62,4.85],[33.39,3.79],[31.88,3.56],[30.83,3.51]]]}];
+
+const CZ_BORDER = [[[14.8104,50.8584],[14.8317,50.858],[14.8679,50.8644],[14.9821,50.8591],[14.9841,50.8677],[14.9829,50.9024],[14.9818,50.9053],[14.9811,50.9091],[14.9821,50.9147],[14.9849,50.9181],[14.9947,50.9251],[14.9978,50.9302],[14.9966,50.9592],[14.9814,50.9732],[14.9652,50.9813],[14.961,50.9927],[14.9611,50.9927],[14.9656,50.9961],[14.9707,50.9987],[14.9764,51.0004],[14.9821,51.0012],[14.9965,51.0078],[15.0012,51.0124],[15.004,51.0207],[15.023,51.0097],[15.0736,51.0026],[15.0821,50.9928],[15.0939,50.9854],[15.1079,50.981],[15.1192,50.9825],[15.1225,50.9927],[15.1225,50.9928],[15.1315,51.0058],[15.1444,51.0116],[15.1561,51.0078],[15.1608,50.9927],[15.1702,50.978],[15.2271,50.9774],[15.2538,50.969],[15.2698,50.9527],[15.2688,50.943],[15.2601,50.9325],[15.2531,50.9141],[15.2561,50.8999],[15.2654,50.8823],[15.2771,50.8657],[15.2878,50.8549],[15.3077,50.8448],[15.3258,50.8397],[15.341,50.8317],[15.353,50.813],[15.3533,50.8033],[15.3505,50.7932],[15.3497,50.7837],[15.3561,50.7755],[15.3686,50.7729],[15.3703,50.7726],[15.3813,50.78],[15.3908,50.7906],[15.4001,50.798],[15.4418,50.8002],[15.6419,50.7558],[15.6532,50.751],[15.6665,50.7381],[15.6738,50.7335],[15.6843,50.7314],[15.7674,50.7442],[15.7922,50.7427],[15.7944,50.7359],[15.7976,50.7298],[15.8482,50.6752],[15.8546,50.6737],[15.8823,50.6742],[15.9415,50.6884],[15.958,50.6869],[15.9715,50.6786],[15.9845,50.6629],[15.9932,50.6494],[15.9986,50.6356],[15.9964,50.6237],[15.982,50.6162],[15.98,50.613],[15.9792,50.6098],[15.9799,50.6066],[15.982,50.6036],[16.0245,50.6086],[16.0865,50.6468],[16.1287,50.644],[16.1603,50.6286],[16.1755,50.6241],[16.1923,50.6266],[16.2045,50.6363],[16.2118,50.6491],[16.2191,50.6591],[16.232,50.6609],[16.2683,50.6604],[16.3009,50.6551],[16.3316,50.644],[16.4168,50.5866],[16.4259,50.5676],[16.3945,50.5593],[16.3983,50.5518],[16.3983,50.5485],[16.3955,50.5457],[16.3912,50.5399],[16.3896,50.5348],[16.3883,50.5271],[16.3884,50.5213],[16.3912,50.5218],[16.3826,50.5142],[16.362,50.5012],[16.3526,50.4928],[16.3355,50.4904],[16.3034,50.496],[16.2877,50.4928],[16.28,50.4799],[16.265,50.4716],[16.2474,50.465],[16.232,50.4568],[16.2265,50.4554],[16.2173,50.4517],[16.2112,50.4513],[16.2161,50.4402],[16.218,50.4371],[16.198,50.44],[16.1902,50.4242],[16.1996,50.4063],[16.232,50.4026],[16.2449,50.3768],[16.2497,50.371],[16.2625,50.3644],[16.2698,50.3655],[16.277,50.3694],[16.2886,50.3719],[16.3342,50.3719],[16.3437,50.37],[16.3508,50.3606],[16.3515,50.3513],[16.3507,50.3423],[16.3532,50.3335],[16.371,50.3184],[16.4156,50.3079],[16.4378,50.298],[16.4522,50.285],[16.4776,50.2553],[16.492,50.2427],[16.5048,50.228],[16.535,50.2077],[16.5459,50.1888],[16.5573,50.1547],[16.5667,50.1422],[16.5842,50.1274],[16.6187,50.107],[16.6606,50.093],[16.7012,50.0949],[16.732,50.122],[16.7543,50.1323],[16.7664,50.1434],[16.7773,50.1569],[16.7953,50.1744],[16.8177,50.1868],[16.8376,50.1886],[16.8576,50.1877],[16.8698,50.1897],[16.881,50.1916],[16.8904,50.1969],[16.907,50.2118],[16.919,50.2171],[16.9278,50.2173],[16.9463,50.2131],[16.9553,50.2135],[16.9578,50.2171],[16.9575,50.2292],[16.9603,50.232],[16.975,50.2318],[16.981,50.2292],[16.9857,50.2231],[16.9963,50.2129],[17.0084,50.21],[17.0148,50.2185],[17.0128,50.2317],[16.9998,50.2427],[16.9984,50.267],[16.9878,50.2849],[16.9696,50.2978],[16.9452,50.3069],[16.9265,50.3193],[16.9167,50.3386],[16.9093,50.3599],[16.8979,50.3782],[16.8659,50.4084],[16.8658,50.4224],[16.893,50.4329],[16.9158,50.4311],[16.944,50.4203],[16.9588,50.4146],[16.9819,50.4164],[17.0847,50.398],[17.0956,50.3937],[17.1189,50.3812],[17.1317,50.3768],[17.1454,50.3767],[17.1759,50.3807],[17.1876,50.3785],[17.1854,50.3757],[17.1889,50.3648],[17.1951,50.3519],[17.201,50.3432],[17.2109,50.3364],[17.2461,50.3221],[17.2699,50.3178],[17.3168,50.3186],[17.3375,50.313],[17.3191,50.3082],[17.3219,50.3045],[17.3254,50.3011],[17.3295,50.2982],[17.3341,50.2957],[17.3328,50.2827],[17.3348,50.27],[17.3417,50.2597],[17.355,50.2533],[17.3659,50.2716],[17.388,50.2726],[17.4098,50.2613],[17.4191,50.2427],[17.4242,50.2406],[17.4296,50.2398],[17.4348,50.2405],[17.44,50.2427],[17.4694,50.2656],[17.517,50.2684],[17.6064,50.2582],[17.6295,50.2621],[17.6467,50.2711],[17.6764,50.2974],[17.6819,50.3056],[17.6845,50.3124],[17.691,50.3151],[17.708,50.311],[17.7136,50.3077],[17.732,50.2918],[17.7345,50.2895],[17.735,50.2868],[17.7342,50.2838],[17.732,50.2807],[17.7211,50.2619],[17.7192,50.2528],[17.7214,50.2427],[17.732,50.236],[17.7476,50.2175],[17.7382,50.2024],[17.7179,50.1911],[17.6753,50.1747],[17.6487,50.168],[17.6004,50.1668],[17.5894,50.1632],[17.5821,50.1532],[17.5842,50.1459],[17.6328,50.1063],[17.6484,50.1018],[17.6585,50.103],[17.667,50.1061],[17.6776,50.1077],[17.6907,50.1055],[17.7179,50.0968],[17.732,50.0949],[17.7324,50.0939],[17.7326,50.093],[17.7324,50.0922],[17.732,50.0915],[17.7227,50.0864],[17.7195,50.0809],[17.7226,50.0751],[17.732,50.0691],[17.743,50.0606],[17.7499,50.0495],[17.7554,50.0372],[17.7633,50.0252],[17.7746,50.0152],[17.8394,49.9736],[17.8757,49.9687],[17.9121,49.9758],[17.9416,49.9928],[17.9598,49.9958],[17.9999,49.9966],[18.0324,50.0028],[18.0375,50.0072],[18.0357,50.0172],[18.0287,50.0241],[18.0201,50.0243],[18.0122,50.0227],[18.0069,50.0241],[18.0024,50.0468],[18.0191,50.0441],[18.0332,50.0418],[18.0916,50.0172],[18.0851,49.9988],[18.0982,49.989],[18.162,49.9812],[18.1772,49.9758],[18.2087,49.9583],[18.2205,49.9549],[18.244,49.9517],[18.2559,49.946],[18.2601,49.9406],[18.267,49.9251],[18.2726,49.9183],[18.2925,49.9078],[18.3069,49.9097],[18.3349,49.9254],[18.3338,49.9271],[18.3325,49.9283],[18.3307,49.9288],[18.3285,49.9288],[18.3688,49.932],[18.4075,49.9232],[18.4818,49.8966],[18.5051,49.8967],[18.5444,49.913],[18.5592,49.9072],[18.5654,49.889],[18.5629,49.8737],[18.5673,49.8615],[18.5938,49.8522],[18.5663,49.8316],[18.5668,49.8048],[18.5841,49.7744],[18.6077,49.743],[18.6177,49.7139],[18.624,49.7064],[18.6373,49.7003],[18.6681,49.6986],[18.6824,49.6958],[18.6954,49.6889],[18.7151,49.6738],[18.7277,49.6689],[18.7422,49.6697],[18.7579,49.6741],[18.7735,49.6758],[18.7884,49.6686],[18.7926,49.6608],[18.7993,49.6264],[18.8039,49.6168],[18.8157,49.5993],[18.8202,49.5903],[18.8345,49.5476],[18.8374,49.527],[18.8332,49.5103],[18.7923,49.5095],[18.7736,49.5049],[18.7325,49.4803],[18.7045,49.4793],[18.6756,49.485],[18.6428,49.4958],[18.6359,49.4967],[18.629,49.4958],[18.6004,49.486],[18.5562,49.4902],[18.5356,49.4817],[18.5305,49.4735],[18.528,49.4549],[18.5229,49.4461],[18.5147,49.4406],[18.4818,49.4291],[18.4392,49.3951],[18.4168,49.3855],[18.3876,49.3898],[18.3852,49.3423],[18.3616,49.3302],[18.3246,49.3113],[18.19,49.2769],[18.1606,49.2587],[18.1365,49.2331],[18.1178,49.2026],[18.1051,49.1698],[18.1015,49.1429],[18.1016,49.1369],[18.1029,49.0922],[18.0963,49.0703],[18.0755,49.0472],[18.0461,49.0292],[18.0129,49.0191],[17.9592,49.0219],[17.9351,49.0194],[17.9141,49.0105],[17.9008,48.993],[17.8946,48.9782],[17.8869,48.9472],[17.8787,48.9336],[17.8603,48.9217],[17.8412,48.921],[17.8201,48.9234],[17.7955,48.9206],[17.7794,48.9117],[17.7449,48.8726],[17.7272,48.8629],[17.5351,48.813],[17.4985,48.8168],[17.4679,48.8381],[17.4533,48.8428],[17.4296,48.8382],[17.4112,48.8302],[17.3917,48.8218],[17.3744,48.8196],[17.2603,48.8578],[17.2122,48.8661],[17.1675,48.8598],[17.1137,48.8339],[17.1046,48.8246],[17.0987,48.8058],[17.0844,48.7937],[17.0499,48.774],[17.0253,48.7463],[16.9748,48.6499],[16.9633,48.6359],[16.9475,48.6232],[16.945,48.6042],[16.9105,48.6308],[16.8967,48.697],[16.873,48.719],[16.8566,48.7198],[16.8181,48.7108],[16.7989,48.7092],[16.7805,48.7138],[16.7443,48.7296],[16.729,48.7331],[16.691,48.7321],[16.6751,48.7339],[16.662,48.74],[16.6547,48.7519],[16.651,48.7662],[16.6431,48.7783],[16.624,48.7834],[16.6055,48.7848],[16.5458,48.7963],[16.5287,48.8035],[16.5195,48.8056],[16.5103,48.8048],[16.4923,48.7997],[16.4819,48.7994],[16.4531,48.8022],[16.4357,48.7945],[16.385,48.7371],[16.374,48.7303],[16.3583,48.7273],[16.3527,48.7284],[16.3395,48.7356],[16.3187,48.7335],[16.3176,48.7328],[16.1778,48.7465],[16.0854,48.7429],[16.0323,48.7581],[15.9318,48.8064],[15.9303,48.8114],[15.9303,48.8183],[15.9251,48.8226],[15.9081,48.8197],[15.9071,48.8303],[15.8996,48.8347],[15.8884,48.8351],[15.8758,48.8331],[15.886,48.842],[15.8776,48.8417],[15.8702,48.8439],[15.8592,48.8492],[15.8401,48.8501],[15.8333,48.852],[15.8283,48.8571],[15.8243,48.8694],[15.8185,48.8723],[15.7879,48.8723],[15.7792,48.8709],[15.7437,48.8585],[15.7268,48.855],[15.7038,48.855],[15.6813,48.8585],[15.6037,48.8874],[15.5442,48.9026],[15.5213,48.9085],[15.4719,48.9367],[15.4504,48.9448],[15.4059,48.9547],[15.3579,48.9708],[15.3355,48.975],[15.2887,48.9754],[15.2837,48.9776],[15.2796,48.9826],[15.2745,48.9867],[15.2669,48.9867],[15.2629,48.9826],[15.2604,48.9692],[15.2571,48.9639],[15.2432,48.9529],[15.2381,48.9508],[15.1618,48.9372],[15.1419,48.9375],[15.1486,48.9517],[15.149,48.9653],[15.1447,48.9789],[15.1374,48.993],[15.0596,48.9972],[15.004,49.0098],[14.9821,49.0079],[14.9789,49.0063],[14.9773,49.0029],[14.9773,48.9983],[14.9782,48.9928],[14.9646,48.9717],[14.9642,48.9433],[14.9683,48.9127],[14.9682,48.885],[14.947,48.8224],[14.9398,48.8098],[14.9381,48.8028],[14.9401,48.7965],[14.9444,48.7886],[14.9489,48.7821],[14.9511,48.7803],[14.9396,48.7628],[14.9193,48.7616],[14.8676,48.7756],[14.8155,48.7803],[14.8004,48.7765],[14.7945,48.767],[14.7904,48.7549],[14.7804,48.7431],[14.7754,48.724],[14.7227,48.6934],[14.7038,48.6731],[14.7002,48.6461],[14.7007,48.6155],[14.6957,48.5895],[14.6911,48.5865],[14.6756,48.5762],[14.6592,48.577],[14.6513,48.5835],[14.6454,48.5929],[14.6347,48.6023],[14.6282,48.6033],[14.6129,48.5997],[14.6051,48.6003],[14.6019,48.6045],[14.6018,48.6112],[14.6006,48.6176],[14.5942,48.6213],[14.5788,48.6205],[14.5488,48.6109],[14.5338,48.6087],[14.522,48.6106],[14.4821,48.6245],[14.4582,48.6432],[14.4436,48.6365],[14.4212,48.5971],[14.4054,48.5863],[14.3534,48.5714],[14.3332,48.5607],[14.3254,48.5586],[14.3157,48.5579],[14.2165,48.5812],[14.0748,48.5917],[14.0408,48.6012],[14.0325,48.6061],[14.0152,48.6204],[14.0109,48.6259],[14.0062,48.6395],[14.0081,48.6424],[14.0137,48.6438],[14.0205,48.6532],[14.0235,48.6546],[14.0283,48.654],[14.0329,48.6549],[14.0347,48.6612],[14.0321,48.6673],[14.0262,48.6701],[14.0192,48.6719],[14.0142,48.6751],[14.0078,48.6833],[13.9911,48.7002],[13.9823,48.7065],[13.915,48.731],[13.8931,48.743],[13.8749,48.7524],[13.8559,48.7593],[13.8157,48.7664],[13.7962,48.7798],[13.7479,48.8434],[13.7247,48.8673],[13.7106,48.8725],[13.6734,48.8763],[13.6544,48.8822],[13.6374,48.8935],[13.6218,48.9091],[13.6111,48.9272],[13.6087,48.9462],[13.5905,48.9448],[13.5734,48.951],[13.5565,48.96],[13.5389,48.967],[13.5224,48.9693],[13.516,48.9702],[13.5021,48.9661],[13.4926,48.955],[13.4823,48.9376],[13.4589,48.945],[13.4273,48.96],[13.3985,48.9777],[13.3842,48.993],[13.3836,49.0211],[13.3724,49.0385],[13.3299,49.0669],[13.2995,49.0936],[13.2873,49.1006],[13.2673,49.1056],[13.2068,49.1075],[13.1785,49.1183],[13.1626,49.1351],[13.1495,49.1548],[13.0558,49.2382],[13.0434,49.2428],[13.0432,49.2429],[13.0113,49.2678],[13.0067,49.2771],[13.0054,49.2868],[12.9998,49.2949],[12.9824,49.2996],[12.9543,49.3191],[12.9399,49.3268],[12.9229,49.3327],[12.8847,49.3396],[12.8709,49.3367],[12.8754,49.3239],[12.8567,49.3222],[12.7978,49.3278],[12.7779,49.3325],[12.7621,49.3432],[12.7293,49.3911],[12.7092,49.4047],[12.6631,49.4189],[12.6435,49.4295],[12.6322,49.444],[12.6272,49.4602],[12.6243,49.493],[12.623,49.5098],[12.6155,49.5138],[12.605,49.5128],[12.5937,49.515],[12.5829,49.5224],[12.575,49.5299],[12.5687,49.5388],[12.5623,49.5508],[12.5583,49.5626],[12.5536,49.5847],[12.5466,49.5956],[12.5361,49.6031],[12.5122,49.6116],[12.502,49.6197],[12.5027,49.6221],[12.5074,49.63],[12.4995,49.6325],[12.4969,49.6339],[12.5054,49.6461],[12.5046,49.6594],[12.4964,49.67],[12.4825,49.6747],[12.4492,49.685],[12.4339,49.6918],[12.4196,49.7002],[12.3989,49.7195],[12.3886,49.7323],[12.3836,49.7429],[12.3954,49.7579],[12.4367,49.7693],[12.4527,49.7797],[12.4559,49.7961],[12.4564,49.8171],[12.4625,49.8312],[12.4825,49.8272],[12.4899,49.8427],[12.5129,49.8702],[12.521,49.8855],[12.5241,49.905],[12.5179,49.9122],[12.5036,49.9158],[12.4627,49.9313],[12.4638,49.9421],[12.4707,49.9556],[12.4682,49.9702],[12.4513,49.9806],[12.4145,49.983],[12.3992,49.9928],[12.3982,49.9928],[12.2469,50.045],[12.2437,50.0513],[12.2435,50.0604],[12.2414,50.0706],[12.2325,50.0805],[12.218,50.0886],[12.202,50.0945],[12.1879,50.1028],[12.1792,50.118],[12.1786,50.133],[12.1856,50.1557],[12.1827,50.1707],[12.1751,50.1826],[12.1638,50.1938],[12.1393,50.211],[12.0899,50.2308],[12.0796,50.2427],[12.0921,50.2548],[12.1024,50.2592],[12.1091,50.2638],[12.111,50.2766],[12.1073,50.2909],[12.0992,50.2998],[12.0761,50.3152],[12.1013,50.314],[12.1493,50.3117],[12.1685,50.303],[12.1744,50.2937],[12.1741,50.2766],[12.178,50.2688],[12.1892,50.2625],[12.2038,50.2596],[12.2325,50.2591],[12.2396,50.2566],[12.243,50.253],[12.2424,50.2484],[12.238,50.2427],[12.2364,50.2426],[12.2351,50.2423],[12.2338,50.2417],[12.2325,50.241],[12.2298,50.2391],[12.2289,50.237],[12.2299,50.2348],[12.2325,50.2325],[12.25,50.2212],[12.2543,50.2174],[12.2585,50.2109],[12.2602,50.205],[12.2612,50.1999],[12.2732,50.1723],[12.2834,50.1622],[12.3004,50.1608],[12.3144,50.1673],[12.3144,50.1762],[12.3086,50.1869],[12.3056,50.1993],[12.3087,50.2171],[12.3141,50.2265],[12.3338,50.2427],[12.3365,50.2586],[12.3447,50.2664],[12.3558,50.2714],[12.3672,50.2791],[12.3982,50.3152],[12.4089,50.322],[12.4383,50.3325],[12.4502,50.3394],[12.4538,50.3407],[12.4628,50.3405],[12.4668,50.3419],[12.469,50.3456],[12.4684,50.3495],[12.467,50.3528],[12.4668,50.3549],[12.4695,50.3594],[12.4716,50.3645],[12.4751,50.3694],[12.4825,50.3736],[12.5102,50.3888],[12.5505,50.3964],[12.6254,50.3999],[12.6788,50.3937],[12.6918,50.3947],[12.703,50.4015],[12.7251,50.4234],[12.7379,50.4315],[12.7542,50.4353],[12.7703,50.4359],[12.7881,50.4343],[12.7943,50.4359],[12.8084,50.4418],[12.8174,50.443],[12.8258,50.4414],[12.9184,50.4054],[12.9526,50.4042],[12.9606,50.4092],[12.9824,50.423],[12.9966,50.4337],[13.0031,50.4519],[13.0096,50.4927],[13.0179,50.4963],[13.0263,50.4976],[13.0345,50.4965],[13.0423,50.4928],[13.0511,50.4911],[13.0604,50.4906],[13.0698,50.4911],[13.0789,50.4927],[13.079,50.4927],[13.0792,50.4928],[13.1074,50.499],[13.1601,50.497],[13.1847,50.5088],[13.1991,50.5253],[13.2323,50.582],[13.2518,50.5809],[13.268,50.5737],[13.2846,50.569],[13.3056,50.5758],[13.3163,50.596],[13.3219,50.6024],[13.3594,50.6193],[13.3654,50.6235],[13.366,50.6271],[13.3688,50.6283],[13.381,50.6255],[13.3863,50.6216],[13.4004,50.6066],[13.407,50.6013],[13.4293,50.5943],[13.4479,50.5973],[13.4649,50.6071],[13.4823,50.6209],[13.4922,50.6245],[13.4982,50.6292],[13.4991,50.6352],[13.4933,50.6432],[13.51,50.6512],[13.5233,50.6622],[13.5272,50.6757],[13.5156,50.691],[13.5566,50.7067],[13.6019,50.7122],[13.6918,50.7118],[13.711,50.7143],[13.7491,50.7232],[13.7707,50.7246],[13.8166,50.7214],[13.8345,50.7237],[13.8635,50.7351],[13.8696,50.7353],[13.8754,50.7365],[13.8822,50.7427],[13.8827,50.748],[13.8803,50.755],[13.8791,50.7635],[13.8833,50.7732],[13.8925,50.7804],[13.901,50.7806],[13.9107,50.7788],[13.9233,50.78],[13.9335,50.7848],[13.9488,50.7972],[13.9596,50.8021],[13.9791,50.8048],[14.0157,50.8018],[14.0349,50.8026],[14.1908,50.8479],[14.203,50.8551],[14.2213,50.8726],[14.2321,50.8794],[14.2681,50.8841],[14.3465,50.8802],[14.3759,50.896],[14.3819,50.9209],[14.3552,50.9306],[14.3183,50.9375],[14.2928,50.9535],[14.2937,50.964],[14.3022,50.9677],[14.3038,50.9697],[14.2838,50.9748],[14.25,50.9776],[14.2383,50.9825],[14.2495,50.9927],[14.2636,51.0214],[14.2875,51.0368],[14.3194,51.04],[14.3566,51.0323],[14.3641,51.028],[14.3694,51.0224],[14.3759,51.017],[14.3867,51.0133],[14.3978,51.0131],[14.4258,51.0209],[14.4621,51.0197],[14.4735,51.0234],[14.4821,51.0372],[14.4879,51.0287],[14.4901,51.0227],[14.4935,51.0167],[14.5029,51.0085],[14.5153,51.003],[14.5423,50.9987],[14.5546,50.9927],[14.5667,50.9834],[14.5743,50.9755],[14.5774,50.9657],[14.5756,50.9507],[14.5678,50.9386],[14.5558,50.9243],[14.5504,50.9121],[14.5618,50.9064],[14.6171,50.9209],[14.6292,50.9207],[14.6346,50.9094],[14.6288,50.8961],[14.6119,50.871],[14.6083,50.8531],[14.6132,50.8456],[14.6479,50.8394],[14.6622,50.8344],[14.7004,50.816],[14.7375,50.8107],[14.7592,50.8102],[14.7754,50.813],[14.7851,50.8201],[14.7946,50.8316],[14.8104,50.8584]]];
+
+</script>
+
+<!-- CANVAS -->
+<script>
+
+(function() {
+  const canvas = document.getElementById('bg-canvas');
+  if (!canvas) return;
+  const ctx = canvas.getContext('2d');
+  let W, H;
+
+  function resize() { W = canvas.width = window.innerWidth; H = canvas.height = window.innerHeight; }
+  resize();
+  window.addEventListener('resize', resize);
+
+  let scrollOffset = 0, lastTime = 0;
+  const scrollSpeed = 3.5;
+
+  const lines = [
+    'root@tester:~# ./protocol.sh --init',
+    'Initializing HRA NA VRAHY v3.7...',
+    '[OK] 20 agents registered',
+    '[OK] weapons randomized',
+    '[OK] targets assigned',
+    '[OK] 20/20 emails delivered',
+    '',
+    'root@tester:~# tail -f kill.log',
+    '[14:23:07] KILL: agent_07 >> agent_12',
+    '          weapon: red_pen',
+    '[15:41:33] KILL: agent_03 >> agent_18',
+    '          weapon: plastic_fork',
+    '[16:02:11] KILL: agent_15 >> agent_04',
+    '          weapon: paper_cup',
+    '',
+    'survivors: 17/20',
+    'status: IN_PROGRESS',
+    '',
+    'root@tester:~# whoami',
+    'nobody.',
+    '',
+    'WE ARE TESTERS.',
+    'WE ARE MANY.',
+    'WE DO NOT FORGIVE BUGS.',
+    'WE DO NOT FORGET INCIDENTS.',
+    'WE DO NOT FORGET FAILED DEPLOYS.',
+    'EXPECT OUR REPORTS.',
+    'EXPECT OUR JIRA TICKETS.',
+    '',
+    'root@tester:~# cat manifesto.txt',
+    'We test in the dark',
+    'so others can deploy in light.',
+    '',
+    '01001000 01100001 01100011',
+    '01101011 01100101 01110010',
+    '',
+    'root@tester:~# _',
+    '',
+    '',
+  ];
+
+  // Perspektivní helper
+  function perspItem(relX, relY, w, h, vpX, deskY, tFront, tBack) {
+    const scale = 1 - relY * 0.55;
+    const screenX = vpX + (relX * W - vpX) * (1 - relY * 0.4);
+    const screenY = tBack + (tFront - tBack) * (1 - relY * 0.8) - h * scale;
+    return { x: screenX - w * scale * 0.5, y: screenY, w: w * scale, h: h * scale, scale };
+  }
+
+  function easeInOut(t) { return t < 0.5 ? 2*t*t : -1+(4-2*t)*t; }
+  function lerp(a, b, t) { return a + (b-a) * easeInOut(Math.max(0, Math.min(1, t))); }
+  function lonLatToXY(lon, lat) { return { x: (lon+180)/360, y: (90-lat)/180 }; }
+
+  const CYCLE = 46000; // 46s celková smyčka
+  const tileCache = {};
+
+  // Levels s reálnými souřadnicemi a zoom úrovněmi
+  // Logika: každá fáze = zobraz mapu NA TÉTO úrovni, blikni bbox KAM ZOOMUJEME, pak zoom
+  // lat/lon = střed TOHOTO pohledu, nextLat/nextLon = střed DALŠÍHO pohledu (cílová oblast)
+  const levels = [
+    // 0: Svět
+    { lat:20,     lon:10,      zoom:1.2,
+      nextLat:52,  nextLon:13,
+      label:'GLOBAL SCAN',     sublabel:'LOCATING TARGET...',
+      t0:0,     t1:8000,
+      bbox:{lat1:60,lon1:-2,lat2:44,lon2:28}, bboxLabel:'EUROPE' },
+    // 1: Evropa - centrovaná na střed Evropy
+    { lat:52,     lon:13,      zoom:3.2,
+      nextLat:49.8, nextLon:15.5,
+      label:'EUROPE',          sublabel:'REGION IDENTIFIED',
+      t0:8000,  t1:16000,
+      bbox:{lat1:51.05,lon1:12.08,lat2:48.55,lon2:18.87}, bboxLabel:'CZ' },
+    // 2: ČR - střed ČR
+    { lat:49.8,   lon:15.5,    zoom:6.2,
+      nextLat:50.18, nextLon:12.95,
+      label:'CZECH REPUBLIC',  sublabel:'TARGET COUNTRY',
+      t0:16000, t1:24000,
+      bbox:{lat1:50.58,lon1:12.15,lat2:49.82,lon2:13.82}, bboxLabel:'KV REGION' },
+    // 3: KV kraj - střed kraje
+    { lat:50.18,  lon:12.95,   zoom:9.2,
+      nextLat:50.370, nextLon:12.901,
+      label:'KARLOVARSKÝ KRAJ', sublabel:'TARGET REGION',
+      t0:24000, t1:32000,
+      bbox:{lat1:50.376,lon1:12.892,lat2:50.364,lon2:12.910}, bboxLabel:'KLÍNOVEC' },
+    // 4: Klínovec - přesně uprostřed
+    { lat:50.370, lon:12.901,  zoom:13.5,
+      nextLat:50.370, nextLon:12.901,
+      label:'KLÍNOVEC',        sublabel:'50.3698°N 12.9019°E',
+      t0:32000, t1:46000,
+      bbox:null },
+  ];
+
+  // Mercator helper
+  function latLonToScreen(lat, lon, center, tileSize, z) {
+    const zf = Math.pow(2, z);
+    const tx = (lon+180)/360*zf;
+    const sinLat = Math.sin(lat*Math.PI/180);
+    const ty = (1 - Math.log((1+sinLat)/(1-sinLat))/(2*Math.PI))/2*zf;
+    const lapX2 = W*0.06, lapW2 = W*0.24, lapH2 = lapW2*0.68, lapY2 = H*0.66-lapH2-H*0.01;
+    const lapTLx = lapX2+lapW2*0.03, lapTLy = lapY2+lapH2*0.02;
+    const scrW2 = lapW2*0.94;
+    return {
+      x: lapTLx + scrW2*0.5 + (tx - center.tx)*tileSize,
+      y: lapTLy + (H*0.66-H*0.016-lapTLy)*0.5 + (ty - center.ty)*tileSize,
+    };
+  }
+
+  const continents = [
+    [[0.05,0.12],[0.28,0.10],[0.30,0.35],[0.20,0.50],[0.08,0.45],[0.04,0.28]],
+    [[0.20,0.52],[0.30,0.50],[0.32,0.72],[0.22,0.82],[0.16,0.70],[0.18,0.58]],
+    [[0.42,0.10],[0.58,0.08],[0.60,0.28],[0.55,0.35],[0.58,0.55],[0.52,0.78],[0.44,0.82],[0.40,0.65],[0.42,0.45],[0.38,0.30],[0.40,0.18]],
+    [[0.58,0.08],[0.95,0.08],[0.98,0.45],[0.85,0.55],[0.75,0.60],[0.65,0.52],[0.60,0.40],[0.55,0.35],[0.58,0.20]],
+    [[0.75,0.62],[0.92,0.60],[0.94,0.78],[0.82,0.82],[0.72,0.76]],
+  ];
+
+  function draw(time) {
+    const dt = Math.min((time - lastTime) / 1000, 0.05);
+    lastTime = time;
+    scrollOffset = (scrollOffset + dt * scrollSpeed) % lines.length;
+    ctx.clearRect(0, 0, W, H);
+
+    const vpX = W*0.62, vpY = H*0.38;
+    const floorY = H*0.80, deskY = H*0.66;
+    const tL=W*0.05, tR=W*0.95, tLb=W*0.22, tRb=W*0.78;
+    const tFront=deskY, tBack=deskY-H*0.05, tThick=H*0.022;
+    const pulse = 0.18 + Math.sin(time*0.0008)*0.03;
+
+    // POZADÍ s glitch efekty
+    // Glitch vlny - nepravidelné, reagují na čas a scroll
+    const g1 = Math.sin(time * 0.00071) * Math.sin(time * 0.00213 + scrollOffset * 0.1);
+    const g2 = Math.sin(time * 0.00133) * Math.cos(time * 0.00089);
+    const g3 = Math.sin(time * 0.00047 + scrollOffset * 0.05) * Math.sin(time * 0.00312);
+    const glitchPulse = Math.max(0, g1 * 0.4 + g2 * 0.3 + g3 * 0.3);
+    // Občasný silnější záblesk
+    const flash = Math.max(0, Math.sin(time * 0.00089) > 0.88
+      ? (Math.sin(time * 0.00089) - 0.88) / 0.12 : 0);
+    const totalGlitch = Math.min(1, glitchPulse + flash * 0.5);
+
+    // Dynamická pozice světelného zdroje - mírně se posouvá
+    const lightDX = Math.sin(time * 0.00041) * W * 0.06 + Math.sin(time * 0.00127) * W * 0.03;
+    const lightDY = Math.cos(time * 0.00053) * H * 0.04;
+    const dynVpX = vpX + lightDX;
+    const dynVpY = vpY + lightDY;
+
+    const bgGrad=ctx.createLinearGradient(0,0,0,H);
+    bgGrad.addColorStop(0,'#020510'); bgGrad.addColorStop(0.4,'#051220'); bgGrad.addColorStop(1,'#030815');
+    ctx.fillStyle=bgGrad; ctx.fillRect(0,0,W,H);
+
+    // Hlavní záře - dynamická pozice
+    const wallGrad=ctx.createRadialGradient(dynVpX,dynVpY,0,dynVpX,dynVpY,W*0.7);
+    const wp = pulse + totalGlitch * 0.25;
+    wallGrad.addColorStop(0,`rgba(40,140,255,${wp*0.65})`);
+    wallGrad.addColorStop(0.3,`rgba(15,80,180,${wp*0.35})`);
+    wallGrad.addColorStop(0.6,`rgba(8,40,120,${wp*0.18})`);
+    wallGrad.addColorStop(1,'rgba(0,0,0,0)');
+    ctx.fillStyle=wallGrad; ctx.fillRect(0,0,W,H);
+
+    // Sekundární záře - pohybuje se opačně
+    const wallGrad2=ctx.createRadialGradient(
+      vpX - lightDX*0.6, vpY - lightDY*0.6, 0,
+      vpX - lightDX*0.6, vpY - lightDY*0.6, W*0.5);
+    wallGrad2.addColorStop(0,`rgba(20,80,200,${(pulse+totalGlitch*0.15)*0.3})`);
+    wallGrad2.addColorStop(0.5,`rgba(8,40,140,${pulse*0.12})`);
+    wallGrad2.addColorStop(1,'rgba(0,0,0,0)');
+    ctx.fillStyle=wallGrad2; ctx.fillRect(0,0,W,H);
+
+    const ambGrad=ctx.createLinearGradient(0,0,W,H);
+    ambGrad.addColorStop(0,`rgba(10,60,160,${pulse*0.45})`);
+    ambGrad.addColorStop(0.5,`rgba(15,80,200,${pulse*0.28})`);
+    ambGrad.addColorStop(1,`rgba(8,40,140,${pulse*0.38})`);
+    ctx.fillStyle=ambGrad; ctx.fillRect(0,0,W,H);
+
+    // Glitch pruhy - horizontální scanlines přes pozadí
+    if (totalGlitch > 0.2) {
+      const numStripes = Math.floor(totalGlitch * 4) + 1;
+      for (let gs = 0; gs < numStripes; gs++) {
+        const gy = (Math.sin(time * 0.00123 + gs * 1.7) * 0.5 + 0.5) * H;
+        const gh = H * (0.005 + Math.abs(Math.sin(time * 0.002 + gs)) * 0.015);
+        const gAlpha = totalGlitch * 0.12;
+        ctx.fillStyle = `rgba(30,100,220,${gAlpha})`;
+        ctx.fillRect(0, gy, W, gh);
+      }
+    }
+
+    // Záblesk celé obrazovky
+    if (flash > 0.1) {
+      ctx.fillStyle = `rgba(15,60,180,${flash * 0.08})`;
+      ctx.fillRect(0, 0, W, H);
+    }
+
+    ctx.fillStyle='#020609'; ctx.fillRect(0,0,W,H*0.06);
+
+    // PODLAHA
+    ctx.fillStyle='#020810'; ctx.beginPath(); ctx.moveTo(0,floorY); ctx.lineTo(W,floorY); ctx.lineTo(W,H); ctx.lineTo(0,H); ctx.closePath(); ctx.fill();
+    ctx.strokeStyle='rgba(15,50,90,0.3)'; ctx.lineWidth=0.8;
+    for(let i=0;i<=8;i++){const x=W*i/8;ctx.beginPath();ctx.moveTo(x,floorY);ctx.lineTo(i<4?0:W,H);ctx.stroke();}
+    for(let j=1;j<=4;j++){ctx.beginPath();ctx.moveTo(0,floorY+(H-floorY)*j/4);ctx.lineTo(W,floorY+(H-floorY)*j/4);ctx.stroke();}
+    const floorRefl=ctx.createRadialGradient(vpX,floorY,0,vpX,floorY,W*0.5);
+    floorRefl.addColorStop(0,`rgba(20,120,240,${pulse*0.55})`); floorRefl.addColorStop(0.4,`rgba(10,70,180,${pulse*0.25})`); floorRefl.addColorStop(1,'rgba(0,0,0,0)');
+    ctx.fillStyle=floorRefl; ctx.fillRect(0,floorY,W,H-floorY);
+
+    // STROP + KABELY
+    ctx.fillStyle='#020609'; ctx.fillRect(0,0,W,H*0.06);
+    [{x:W*0.25,len:H*0.20,c:15},{x:W*0.38,len:H*0.28,c:-18},{x:W*0.52,len:H*0.16,c:12},
+     {x:W*0.65,len:H*0.24,c:-20},{x:W*0.78,len:H*0.18,c:16},{x:W*0.88,len:H*0.26,c:-14}
+    ].forEach(cab=>{
+      ctx.strokeStyle='rgba(10,22,38,0.95)'; ctx.lineWidth=Math.max(1,3*(1-Math.abs(cab.x-vpX)/W));
+      ctx.beginPath(); ctx.moveTo(cab.x,0); ctx.quadraticCurveTo(cab.x+cab.c,cab.len*0.5,vpX+(cab.x-vpX)*0.85,cab.len); ctx.stroke();
+    });
+
+    // STŮL
+    ctx.fillStyle='#0c1a28'; ctx.beginPath(); ctx.moveTo(tL,tFront); ctx.lineTo(tR,tFront); ctx.lineTo(tRb,tBack); ctx.lineTo(tLb,tBack); ctx.closePath(); ctx.fill();
+    ctx.fillStyle='#0f2035'; ctx.fillRect(tL,tFront,tR-tL,tThick);
+    ctx.strokeStyle='rgba(30,80,140,0.3)'; ctx.lineWidth=1;
+    ctx.beginPath(); ctx.moveTo(tL,tFront); ctx.lineTo(tR,tFront); ctx.stroke();
+    ctx.fillStyle='#070f1a';
+    ctx.fillRect(tL+W*0.02,tFront+tThick,W*0.014,floorY-tFront-tThick);
+    ctx.fillRect(tR-W*0.034,tFront+tThick,W*0.014,floorY-tFront-tThick);
+
+    // MONITORY VZADU
+    function drawMonitor(m, textOffset, alpha) {
+      ctx.fillStyle=`rgba(4,11,18,${alpha})`; ctx.beginPath(); ctx.roundRect(m.x-4*m.scale,m.y-4*m.scale,m.w+8*m.scale,m.h+8*m.scale,2); ctx.fill();
+      ctx.fillStyle=`rgba(1,5,8,${alpha})`; ctx.beginPath(); ctx.roundRect(m.x,m.y,m.w,m.h,1); ctx.fill();
+      ctx.fillStyle=`rgba(0,160,220,${pulse*0.12*m.scale*alpha})`; ctx.fillRect(m.x,m.y,m.w,m.h);
+      ctx.save(); ctx.beginPath(); ctx.rect(m.x+1,m.y+1,m.w-2,m.h-2); ctx.clip();
+      const fs=Math.max(4,m.w*0.06), lh=fs*1.5;
+      const off=(scrollOffset+textOffset)%lines.length, sl=Math.floor(off), fr=off-sl;
+      const vis=Math.ceil(m.h/lh)+2;
+      ctx.font=`${fs}px "Share Tech Mono",monospace`;
+      for(let i=0;i<vis;i++){
+        const idx=(sl+i)%lines.length, ly=m.y+3+(i-fr)*lh;
+        if(ly<m.y||ly>m.y+m.h) continue;
+        const txt=lines[idx]; if(!txt) continue;
+        const rY=(ly-m.y)/m.h; let a=1; if(rY<0.1)a=rY/0.1; if(rY>0.9)a=(1-rY)/0.1;
+        ctx.fillStyle=`rgba(60,180,255,${a*0.6*alpha})`; ctx.fillText(txt,m.x+3,ly);
+      }
+      ctx.restore();
+      ctx.fillStyle=`rgba(3,8,16,${alpha})`; ctx.fillRect(m.x+m.w*0.42,m.y+m.h,m.w*0.16,H*0.02*m.scale);
+    }
+
+    drawMonitor(perspItem(0.28,0.85,W*0.20,H*0.28,vpX,deskY,tFront,tBack), 5, 1);
+    drawMonitor(perspItem(0.78,0.70,W*0.22,H*0.30,vpX,deskY,tFront,tBack), 12, 1);
+
+    // HLAVNÍ MONITOR STŘED
+    const mv2=perspItem(0.52,0.6,W*0.26,H*0.35,vpX,deskY,tFront,tBack);
+    ctx.fillStyle='rgba(3,11,21,1)'; ctx.beginPath(); ctx.roundRect(mv2.x-5*mv2.scale,mv2.y-5*mv2.scale,mv2.w+10*mv2.scale,mv2.h+10*mv2.scale,3); ctx.fill();
+    ctx.fillStyle='rgba(1,6,8,1)'; ctx.beginPath(); ctx.roundRect(mv2.x,mv2.y,mv2.w,mv2.h,2); ctx.fill();
+    ctx.fillStyle=`rgba(0,160,220,${pulse*0.15*mv2.scale})`; ctx.fillRect(mv2.x,mv2.y,mv2.w,mv2.h);
+    ctx.save(); ctx.beginPath(); ctx.rect(mv2.x+2,mv2.y+2,mv2.w-4,mv2.h-4); ctx.clip();
+    const fs2=Math.max(6,mv2.w*0.055), lh2=fs2*1.55;
+    const sl2=Math.floor(scrollOffset), fr2=scrollOffset-sl2, vis2=Math.ceil(mv2.h/lh2)+2;
+    for(let i=0;i<vis2;i++){
+      const idx=(sl2+i)%lines.length, ly=mv2.y+4+(i-fr2)*lh2;
+      if(ly<mv2.y||ly>mv2.y+mv2.h) continue;
+      const txt=lines[idx]; if(!txt) continue;
+      const rY=(ly-mv2.y)/mv2.h; let a=1; if(rY<0.08)a=rY/0.08; if(rY>0.88)a=(1-rY)/0.12;
+      if(txt.startsWith('WE ARE')||txt.startsWith('EXPECT')||txt.startsWith('WE DO')){ctx.fillStyle=`rgba(140,200,255,${a})`;ctx.font=`bold ${fs2}px "Share Tech Mono",monospace`;}
+      else if(txt.startsWith('[OK]')){ctx.fillStyle=`rgba(80,210,255,${a*0.9})`;ctx.font=`${fs2}px "Share Tech Mono",monospace`;}
+      else if(txt.startsWith('root@')){ctx.fillStyle=`rgba(60,190,240,${a*0.85})`;ctx.font=`${fs2}px "Share Tech Mono",monospace`;}
+      else{ctx.fillStyle=`rgba(80,180,255,${a*0.7})`;ctx.font=`${fs2}px "Share Tech Mono",monospace`;}
+      ctx.fillText(txt,mv2.x+5,ly);
+    }
+    for(let sy=mv2.y;sy<mv2.y+mv2.h;sy+=3){ctx.fillStyle='rgba(0,0,0,0.1)';ctx.fillRect(mv2.x,sy,mv2.w,1);}
+    if(Math.floor(time/500)%2===0){ctx.fillStyle='rgba(80,210,255,0.7)';ctx.fillRect(mv2.x+5,mv2.y+mv2.h-lh2*1.5,fs2*0.55,fs2);}
+    ctx.restore();
+    ctx.fillStyle='rgba(4,10,18,1)'; ctx.fillRect(mv2.x+mv2.w*0.42,mv2.y+mv2.h,mv2.w*0.14,H*0.025*mv2.scale);
+
+    // LAPTOP - CIA ZOOM s GeoJSON mapou
+    const lapX  = W * 0.03;
+    const lapW  = W * 0.33;
+    const lapH  = lapW * 0.66;
+    const lapY  = deskY - lapH - H * 0.01;
+    const scrX  = lapX + lapW*0.025;
+    const scrY  = lapY + lapH*0.025;
+    const scrW  = lapW * 0.95;
+    const scrH2 = deskY - H*0.018 - scrY;
+
+    // Základna laptopu
+    ctx.fillStyle = '#060e1a';
+    ctx.beginPath(); ctx.roundRect(lapX, deskY-H*0.015, lapW, H*0.022, 2); ctx.fill();
+    ctx.fillStyle = '#040c16';
+    ctx.beginPath();
+    ctx.moveTo(lapX, deskY-H*0.015); ctx.lineTo(lapX+lapW, deskY-H*0.015);
+    ctx.lineTo(lapX+lapW+W*0.013, deskY-H*0.003); ctx.lineTo(lapX-W*0.006, deskY-H*0.003);
+    ctx.closePath(); ctx.fill();
+    ctx.fillStyle = '#040c16';
+    ctx.beginPath(); ctx.roundRect(scrX-4, scrY-4, scrW+8, scrH2+8, 3); ctx.fill();
+
+    ctx.save();
+    ctx.beginPath(); ctx.roundRect(scrX, scrY, scrW, scrH2, 2); ctx.clip();
+    ctx.fillStyle = '#020814'; ctx.fillRect(scrX, scrY, scrW, scrH2);
+
+    // CIA ZOOM stav
+    const ct = time % CYCLE;
+    let curLevel = 0;
+    for (let i = levels.length-1; i >= 0; i--) { if (ct >= levels[i].t0) { curLevel = i; break; } }
+    const lv = levels[curLevel];
+    const nextLv = levels[Math.min(curLevel+1, levels.length-1)];
+    const phaseT = Math.max(0, Math.min(1, (ct - lv.t0) / (lv.t1 - lv.t0)));
+    let viewLat, viewLon, viewZoom;
+    // Zoom začíná až v 55% fáze - nejdřív bbox bliká, pak zoom
+    // Zoom vždy centruje na nextLat/nextLon = střed cílové oblasti
+    if (curLevel < levels.length-1 && phaseT > 0.55) {
+      const zt = easeInOut((phaseT - 0.55) / 0.45);
+      viewLat  = lv.lat  + (lv.nextLat  - lv.lat)  * zt;
+      viewLon  = lv.lon  + (lv.nextLon  - lv.lon)  * zt;
+      viewZoom = lv.zoom + (nextLv.zoom  - lv.zoom) * zt;
+    } else { viewLat = lv.lat; viewLon = lv.lon; viewZoom = lv.zoom; }
+    // bbox bliká jen na začátku fáze (před zoomem)
+    // a jen pokud výsledná velikost je rozumná (ne přes celou obrazovku)
+    // bbox bliká v první polovině fáze (označí kam zoomujeme)
+    // zoom začíná ve druhé polovině fáze
+    const bboxAlpha = (lv.bbox && phaseT < 0.45)
+      ? Math.abs(Math.sin(phaseT / 0.45 * Math.PI * 4)) * 0.95
+      : 0;
+
+    // Mercator projekce
+    function mercY(lat) {
+      const s = Math.sin(lat * Math.PI/180);
+      return (1 - Math.log((1+s)/(1-s))/(2*Math.PI)) / 2;
+    }
+    const centerMX = (viewLon+180)/360;
+    const centerMY = mercY(viewLat);
+    const mapScale = scrW * Math.pow(2, viewZoom-1);
+
+    function geoToScreen(lon, lat) {
+      return {
+        x: scrX + scrW*0.5 + ((lon+180)/360 - centerMX) * mapScale,
+        y: scrY + scrH2*0.5 + (mercY(lat) - centerMY) * mapScale,
+      };
+    }
+
+    // === OCEAN - pozadí ===
+    ctx.fillStyle = 'rgba(5,25,65,0.95)';
+    ctx.fillRect(scrX, scrY, scrW, scrH2);
+
+    // === KRESLENÍ ZEMÍ ===
+    if (typeof GEO_COUNTRIES !== 'undefined') {
+      GEO_COUNTRIES.forEach(country => {
+        const isCZ = country.n === 'Czechia' || country.n === 'Czech Rep.';
+        // ČR přeskočíme - nakreslíme ji zvlášť s detailní hranicí
+        if (isCZ) return;
+
+        country.p.forEach(ring => {
+          let minX=Infinity,maxX=-Infinity,minY=Infinity,maxY=-Infinity;
+          ring.forEach(([lon,lat]) => {
+            const p = geoToScreen(lon,lat);
+            if(p.x<minX)minX=p.x; if(p.x>maxX)maxX=p.x;
+            if(p.y<minY)minY=p.y; if(p.y>maxY)maxY=p.y;
+          });
+          if(maxX<scrX-5||minX>scrX+scrW+5||maxY<scrY-5||minY>scrY+scrH2+5) return;
+          ctx.beginPath();
+          ring.forEach(([lon,lat], i) => {
+            const p = geoToScreen(lon, lat);
+            i===0 ? ctx.moveTo(p.x,p.y) : ctx.lineTo(p.x,p.y);
+          });
+          ctx.closePath();
+          ctx.fillStyle = 'rgba(10,30,80,0.9)';
+          ctx.strokeStyle = 'rgba(20,60,140,0.5)';
+          ctx.fill();
+          ctx.lineWidth = viewZoom > 3 ? 0.8 : 0.4;
+          ctx.stroke();
+        });
+      });
+
+      // ČR - detailní hranice (922 bodů)
+      if (typeof CZ_BORDER !== 'undefined') {
+        CZ_BORDER.forEach(ring => {
+          let minX=Infinity,maxX=-Infinity,minY=Infinity,maxY=-Infinity;
+          ring.forEach(([lon,lat]) => {
+            const p = geoToScreen(lon,lat);
+            if(p.x<minX)minX=p.x; if(p.x>maxX)maxX=p.x;
+            if(p.y<minY)minY=p.y; if(p.y>maxY)maxY=p.y;
+          });
+          if(maxX<scrX-5||minX>scrX+scrW+5||maxY<scrY-5||minY>scrY+scrH2+5) return;
+          ctx.beginPath();
+          ring.forEach(([lon,lat], i) => {
+            const p = geoToScreen(lon, lat);
+            i===0 ? ctx.moveTo(p.x,p.y) : ctx.lineTo(p.x,p.y);
+          });
+          ctx.closePath();
+          ctx.fillStyle = 'rgba(20,55,120,0.95)';
+          ctx.strokeStyle = viewZoom > 4 ? 'rgba(80,150,240,0.9)' : 'rgba(60,130,220,0.7)';
+          ctx.fill();
+          ctx.lineWidth = viewZoom > 5 ? 1.2 : viewZoom > 3 ? 0.8 : 0.4;
+          ctx.stroke();
+        });
+      }
+    }
+
+    // Graticule - čáry zeměpisné sítě
+    ctx.strokeStyle = 'rgba(30,80,160,0.15)'; ctx.lineWidth = 0.3;
+    for (let lon=-180; lon<=180; lon+=30) {
+      const p1=geoToScreen(lon,-85), p2=geoToScreen(lon,85);
+      if(p1.x<scrX-2||p1.x>scrX+scrW+2) continue;
+      ctx.beginPath(); ctx.moveTo(p1.x,p1.y); ctx.lineTo(p2.x,p2.y); ctx.stroke();
+    }
+    for (let lat=-60; lat<=60; lat+=30) {
+      ctx.beginPath();
+      for (let lon=-180; lon<=180; lon+=5) {
+        const p=geoToScreen(lon,lat);
+        lon===-180 ? ctx.moveTo(p.x,p.y) : ctx.lineTo(p.x,p.y);
+      }
+      ctx.stroke();
+    }
+
+    // === BBOX červený obdélník ===
+    if (lv.bbox && bboxAlpha > 0.01) {
+      const p1 = geoToScreen(lv.bbox.lon1, lv.bbox.lat1);
+      const p2 = geoToScreen(lv.bbox.lon2, lv.bbox.lat2);
+      const bx=Math.min(p1.x,p2.x), by=Math.min(p1.y,p2.y);
+      const bw=Math.abs(p2.x-p1.x), bh=Math.abs(p2.y-p1.y);
+      // Bbox příliš velký = skip (>90% obrazovky)
+      if (bw > scrW * 0.92 || bh > scrH2 * 0.92) return;
+      // Clamp do obrazovky
+      const cbx=Math.max(scrX,bx), cby=Math.max(scrY,by);
+      const cbw=Math.min(bw,scrX+scrW-cbx), cbh=Math.min(bh,scrY+scrH2-cby);
+      ctx.strokeStyle=`rgba(255,40,40,${bboxAlpha})`; ctx.lineWidth=2; ctx.strokeRect(cbx,cby,cbw,cbh);
+      ctx.fillStyle=`rgba(255,30,30,${bboxAlpha*0.07})`; ctx.fillRect(cbx,cby,cbw,cbh);
+      // Rohové L-markery
+      const cs = Math.min(cbw,cbh)*0.14+6;
+      ctx.strokeStyle=`rgba(255,80,80,${bboxAlpha})`; ctx.lineWidth=2.2;
+      [[cbx,cby,1,1],[cbx+cbw,cby,-1,1],[cbx,cby+cbh,1,-1],[cbx+cbw,cby+cbh,-1,-1]].forEach(([cx2,cy2,sx2,sy2])=>{
+        ctx.beginPath(); ctx.moveTo(cx2,cy2+sy2*cs); ctx.lineTo(cx2,cy2); ctx.lineTo(cx2+sx2*cs,cy2); ctx.stroke();
+      });
+      ctx.fillStyle=`rgba(255,100,100,${bboxAlpha})`;
+      ctx.font=`bold ${Math.max(6,scrW*0.045)}px "Share Tech Než",monospace`;
+      ctx.font=`bold ${Math.max(6,scrW*0.045)}px "Share Tech Mono",monospace`;
+      ctx.fillText(lv.bboxLabel, cbx+4, cby-5);
+    }
+
+    // === BODY ZÁJMU ===
+    if (viewZoom > 3) {
+      const pois = [
+        // === EVROPA (zoom 2.5-5) - jen tečky hlavních měst, malé popisky ===
+        [50.088, 14.420, 'capital', 'Praha'],
+        [48.856,  2.352, 'capital', 'Paris'],
+        [52.520, 13.405, 'capital', 'Berlin'],
+        [51.507, -0.128, 'capital', 'London'],
+        [40.416, -3.703, 'capital', 'Madrid'],
+        [41.902, 12.496, 'capital', 'Roma'],
+        [55.755, 37.617, 'capital', 'Moskva'],
+        [59.334, 18.063, 'capital', 'Stockholm'],
+        [47.498, 19.040, 'capital', 'Budapest'],
+        [52.230, 21.012, 'capital', 'Warszawa'],
+        [48.210, 16.373, 'capital', 'Wien'],
+        [50.844,  4.352, 'capital', 'Brussels'],
+        [38.716, -9.139, 'capital', 'Lisbon'],
+        [59.913, 10.752, 'capital', 'Oslo'],
+        [55.676, 12.568, 'capital', 'Copenhagen'],
+        [60.169, 24.938, 'capital', 'Helsinki'],
+        [44.804, 20.465, 'capital', 'Belgrade'],
+        [44.432, 26.103, 'capital', 'Bucharest'],
+        [42.698, 23.322, 'capital', 'Sofia'],
+        [37.983, 23.727, 'capital', 'Athens'],
+
+        // === ČR (zoom 5-9) - jen 6 měst ===
+        [50.088, 14.420, 'cztown', 'Praha'],
+        [49.195, 16.608, 'cztown', 'Brno'],
+        [49.747, 13.378, 'cztown', 'Plzeň'],
+        [50.234, 12.871, 'cztown', 'Karlovy Vary'],
+        [48.974, 14.475, 'cztown', 'Č. Budějovice'],
+        [49.833, 18.291, 'cztown', 'Ostrava'],
+
+        // === KLÍNOVEC detail (zoom 10+) ===
+        [50.370, 12.901, 'peak',   'Klínovec 1244m'],
+        [50.393, 12.840, 'peak',   'Fichtelberg 1215m'],
+        [50.340, 12.878, 'peak',   'Neklid 1107m'],
+        [50.381, 12.871, 'town',   'Boží Dar'],
+        [50.358, 12.920, 'town',   'Jáchymov'],
+        [50.405, 12.883, 'border', 'CZ/DE'],
+        [50.364, 12.897, 'build',  'Hotel Klínovec'],
+        [50.373, 12.906, 'build',  'Vrcholová stanice'],
+        [50.375, 12.910, 'build',  'Skiareál'],
+        [50.371, 12.888, 'build',  'Horská chata'],
+        [50.378, 12.900, 'build',  'Vysílač'],
+      ];
+
+      // Kolize textů - sleduj obsazené oblasti
+      const labelRects = [];
+      function canPlace(x, y, w, h) {
+        const pad = 3;
+        for (const r of labelRects) {
+          if (x < r.x+r.w+pad && x+w > r.x-pad && y < r.y+r.h+pad && y+h > r.y-pad) return false;
+        }
+        labelRects.push({x, y, w, h});
+        return true;
+      }
+
+      pois.forEach(([plat, plon, type, label]) => {
+        // Zobrazuj jen relevantní úrovně
+        // Evropská hlavní města - jen při pohledu na Evropu
+        if (type==='capital' && (viewZoom < 2.5 || viewZoom > 5.5)) return;
+        // ČR města - jen při pohledu na ČR
+        if (type==='cztown' && (viewZoom < 5.5 || viewZoom > 10)) return;
+        // Detail Klínovce - jen při max zoom
+        if ((type==='build'||type==='road'||type==='border') && viewZoom < 10) return;
+        if (type==='town' && viewZoom < 10) return;
+        if (type==='peak' && viewZoom < 9) return;
+
+        const p = geoToScreen(plon, plat);
+        if (p.x<scrX+2||p.x>scrX+scrW-2||p.y<scrY+2||p.y>scrY+scrH2*0.78) return;
+
+        const alpha = Math.min(1, viewZoom > 5 ? 1 : viewZoom/5);
+        const fs = Math.max(5, scrW * 0.040);
+
+        if (type==='capital') {
+          // Malá tečka + drobný popisek
+          ctx.fillStyle=`rgba(100,180,255,${alpha*0.85})`;
+          ctx.beginPath(); ctx.arc(p.x,p.y,3,0,Math.PI*2); ctx.fill();
+          // Popisek jen pokud je dost přiblíženo
+          if (viewZoom > 3.2) {
+            const fsC = Math.max(4, scrW*0.030);
+            ctx.font=`${fsC}px "Share Tech Mono",monospace`;
+            const tw = ctx.measureText(label).width;
+            if (canPlace(p.x+4, p.y-fsC, tw, fsC+2)) {
+              ctx.fillStyle=`rgba(0,5,20,${alpha*0.6})`; ctx.fillText(label,p.x+5,p.y+4);
+              ctx.fillStyle=`rgba(140,200,255,${alpha*0.8})`; ctx.fillText(label,p.x+4,p.y+3);
+            }
+          }
+        } else if (type==='cztown') {
+          ctx.fillStyle=`rgba(80,160,255,${alpha*0.9})`;
+          ctx.fillRect(p.x-3.5,p.y-3.5,7,7);
+          ctx.strokeStyle=`rgba(140,200,255,${alpha})`; ctx.lineWidth=0.7;
+          ctx.strokeRect(p.x-3.5,p.y-3.5,7,7);
+          const fsT = Math.max(5, scrW*0.038);
+          ctx.font=`${fsT}px "Share Tech Mono",monospace`;
+          ctx.fillStyle=`rgba(0,5,20,${alpha*0.6})`; ctx.fillText(label,p.x+7,p.y+5);
+          ctx.fillStyle=`rgba(120,190,255,${alpha*0.9})`; ctx.fillText(label,p.x+6,p.y+4);
+        } else if (type==='peak') {
+          ctx.fillStyle=`rgba(80,170,255,${alpha*0.95})`;
+          ctx.beginPath(); ctx.moveTo(p.x,p.y-7); ctx.lineTo(p.x+5,p.y+3); ctx.lineTo(p.x-5,p.y+3); ctx.closePath(); ctx.fill();
+          ctx.strokeStyle=`rgba(140,200,255,${alpha})`; ctx.lineWidth=0.8; ctx.stroke();
+          ctx.font=`bold ${fs}px "Share Tech Mono",monospace`;
+          const twP = ctx.measureText(label).width;
+          if (canPlace(p.x+7, p.y-fs, twP, fs+2)) {
+            ctx.fillStyle=`rgba(0,5,20,${alpha*0.7})`; ctx.fillText(label,p.x+8,p.y+5);
+            ctx.fillStyle=`rgba(120,190,255,${alpha*0.95})`; ctx.fillText(label,p.x+7,p.y+4);
+          }
+        } else if (type==='town') {
+          ctx.fillStyle=`rgba(255,200,80,${alpha*0.85})`;
+          ctx.fillRect(p.x-4,p.y-4,8,8);
+          ctx.strokeStyle=`rgba(255,220,120,${alpha})`; ctx.lineWidth=0.7; ctx.strokeRect(p.x-4,p.y-4,8,8);
+          ctx.font=`${fs}px "Share Tech Mono",monospace`;
+          ctx.fillStyle=`rgba(0,5,20,${alpha*0.6})`; ctx.fillText(label,p.x+7,p.y+5);
+          ctx.fillStyle=`rgba(120,190,255,${alpha*0.9})`; ctx.fillText(label,p.x+6,p.y+4);
+        } else if (type==='build') {
+          ctx.fillStyle=`rgba(60,140,240,${alpha*0.8})`;
+          ctx.fillRect(p.x-3,p.y-3,6,6);
+          ctx.font=`${Math.max(4,fs*0.85)}px "Share Tech Mono",monospace`;
+          const twB = ctx.measureText(label).width;
+          if (canPlace(p.x+6, p.y-fs*0.85, twB, fs*0.85+2)) {
+            ctx.fillStyle=`rgba(100,170,255,${alpha*0.85})`; ctx.fillText(label,p.x+6,p.y+4);
+          }
+        } else if (type==='border') {
+          ctx.strokeStyle=`rgba(160,100,255,${alpha*0.7})`; ctx.lineWidth=1;
+          ctx.beginPath(); ctx.moveTo(p.x-6,p.y); ctx.lineTo(p.x+6,p.y); ctx.stroke();
+          ctx.font=`${Math.max(4,fs*0.8)}px "Share Tech Mono",monospace`;
+          ctx.fillStyle=`rgba(180,140,255,${alpha*0.8})`; ctx.fillText(label,p.x+8,p.y+4);
+        }
+      });
+
+      // Silnice D1-D7 pro pohled ČR (zoom 5.5-8)
+      if (viewZoom > 5.5 && viewZoom < 9.5) {
+        const czRoadAlpha = Math.min(1, (viewZoom - 5.5) * 0.6);
+        const highways = [
+          // D1: Praha - Brno - Ostrava
+          { pts: [[50.088,14.420],[49.900,14.900],[49.700,15.300],[49.500,15.800],[49.300,16.200],[49.195,16.608],[49.400,17.200],[49.833,18.291]], w:1.6, col:`rgba(180,220,255,${czRoadAlpha*0.7})` },
+          // D2: Brno - Bratislava
+          { pts: [[49.195,16.608],[48.974,17.200],[48.700,17.500]], w:1.2, col:`rgba(140,190,255,${czRoadAlpha*0.55})` },
+          // D3: Praha - Č.Budějovice
+          { pts: [[50.088,14.420],[49.900,14.350],[49.600,14.400],[49.200,14.400],[48.974,14.475]], w:1.2, col:`rgba(140,190,255,${czRoadAlpha*0.55})` },
+          // D4: Praha - Písek
+          { pts: [[50.088,14.420],[49.800,14.100],[49.500,13.900],[49.300,14.100]], w:1.0, col:`rgba(120,170,240,${czRoadAlpha*0.45})` },
+          // D5: Praha - Plzeň - Rozvadov (německá hranice)
+          { pts: [[50.088,14.420],[49.900,13.900],[49.747,13.378],[49.600,13.000],[49.680,12.550]], w:1.4, col:`rgba(160,210,255,${czRoadAlpha*0.65})` },
+          // D6: Praha - Karlovy Vary
+          { pts: [[50.088,14.420],[50.150,14.000],[50.200,13.500],[50.220,13.000],[50.234,12.871]], w:1.4, col:`rgba(160,210,255,${czRoadAlpha*0.65})` },
+          // D7: Praha - Chomutov
+          { pts: [[50.088,14.420],[50.200,14.100],[50.350,13.800],[50.460,13.400],[50.460,13.050]], w:1.2, col:`rgba(140,190,255,${czRoadAlpha*0.55})` },
+          // D8: Praha - Ústí n.L. - Dresden
+          { pts: [[50.088,14.420],[50.300,14.200],[50.500,14.100],[50.660,14.045],[50.780,13.980]], w:1.2, col:`rgba(140,190,255,${czRoadAlpha*0.55})` },
+        ];
+        highways.forEach(road => {
+          ctx.strokeStyle = road.col; ctx.lineWidth = road.w;
+          ctx.lineCap = 'round'; ctx.lineJoin = 'round';
+          ctx.beginPath();
+          road.pts.forEach(([rlat,rlon],i) => {
+            const rp = geoToScreen(rlon,rlat);
+            i===0 ? ctx.moveTo(rp.x,rp.y) : ctx.lineTo(rp.x,rp.y);
+          });
+          ctx.stroke();
+        });
+      }
+
+      // Silnice - KV kraj (zoom 7+) a Klínovec detail (zoom 10+)
+      if (viewZoom > 7) {
+        const roadAlpha = Math.min(1, (viewZoom - 7) * 0.5);
+
+        // Hlavní tahy KV kraje - jen to nejdůležitější
+        const roadsKV = [
+          // D6/E48: KV -> Praha (východ)
+          { pts: [[50.234,12.871],[50.220,13.000],[50.210,13.200]], w: 1.5, col: `rgba(180,220,255,${roadAlpha*0.65})` },
+          // Silnice 25: KV -> Jáchymov -> Klínovec
+          { pts: [[50.234,12.871],[50.270,12.888],[50.310,12.920],[50.330,13.003],[50.358,12.920],[50.370,12.901]], w: 1.3, col: `rgba(140,190,255,${roadAlpha*0.6})` },
+          // Silnice na Boží Dar: KV -> Boží Dar -> Klínovec
+          { pts: [[50.234,12.871],[50.280,12.860],[50.340,12.870],[50.381,12.871],[50.370,12.901]], w: 1.1, col: `rgba(120,170,240,${roadAlpha*0.5})` },
+        ];
+
+        // Detail Klínovce (zoom 10+)
+        const roadsKlin = [
+          // Příjezdová cesta na vrchol
+          { pts: [[50.358,12.920],[50.362,12.913],[50.364,12.905],[50.368,12.901],[50.370,12.901]], w: 1.0, col: `rgba(140,190,255,${roadAlpha*0.6})` },
+          // Lyžařské sjezdovky / cesty
+          { pts: [[50.370,12.901],[50.375,12.910],[50.378,12.918]], w: 0.7, col: `rgba(100,160,240,${roadAlpha*0.4})` },
+          { pts: [[50.370,12.901],[50.366,12.910],[50.362,12.918]], w: 0.7, col: `rgba(100,160,240,${roadAlpha*0.4})` },
+          { pts: [[50.370,12.901],[50.373,12.895],[50.375,12.888],[50.378,12.880]], w: 0.8, col: `rgba(100,160,240,${roadAlpha*0.45})` },
+          // Cesta k Horské chatě
+          { pts: [[50.370,12.901],[50.371,12.892],[50.371,12.882]], w: 0.6, col: `rgba(80,140,220,${roadAlpha*0.35})` },
+        ];
+
+        const allRoads = viewZoom > 10
+          ? [...roadsKV, ...roadsKlin]
+          : roadsKV;
+
+        allRoads.forEach(road => {
+          ctx.strokeStyle = road.col;
+          ctx.lineWidth = road.w;
+          ctx.lineCap = 'round';
+          ctx.lineJoin = 'round';
+          ctx.beginPath();
+          road.pts.forEach(([rlat,rlon],i) => {
+            const rp = geoToScreen(rlon, rlat);
+            i===0 ? ctx.moveTo(rp.x,rp.y) : ctx.lineTo(rp.x,rp.y);
+          });
+          ctx.stroke();
+        });
+        ctx.lineCap = 'butt';
+      }
+    }
+
+    // Klínovec - popisek bez záměrného kříže
+    const kp = geoToScreen(12.901, 50.370);
+    if (kp.x>scrX&&kp.x<scrX+scrW&&kp.y>scrY&&kp.y<scrY+scrH2*0.78 && viewZoom>5) {
+      const ca = Math.min(1, (viewZoom-5)/3);
+      // Malá tečka
+      ctx.fillStyle=`rgba(180,220,255,${ca})`;
+      ctx.beginPath(); ctx.arc(kp.x,kp.y,3,0,Math.PI*2); ctx.fill();
+    }
+
+    // HUD
+    ctx.fillStyle='rgba(0,15,40,0.92)'; ctx.fillRect(scrX,scrY+scrH2-scrH2*0.20,scrW,scrH2*0.20);
+    const hf=Math.max(6,scrW*0.050);
+    ctx.fillStyle='rgba(0,190,255,0.98)'; ctx.font=`bold ${hf}px "Share Tech Mono",monospace`;
+    ctx.fillText(lv.label,scrX+6,scrY+scrH2-scrH2*0.12);
+    ctx.fillStyle='rgba(100,170,255,0.88)'; ctx.font=`${Math.max(5,scrW*0.040)}px "Share Tech Mono",monospace`;
+    ctx.fillText(lv.sublabel,scrX+6,scrY+scrH2-scrH2*0.04);
+    ctx.fillStyle='rgba(0,40,100,0.6)'; ctx.fillRect(scrX+5,scrY+scrH2-scrH2*0.026,scrW-10,3);
+    ctx.fillStyle='rgba(0,190,255,0.8)'; ctx.fillRect(scrX+5,scrY+scrH2-scrH2*0.026,(scrW-10)*(ct/CYCLE),3);
+
+    ctx.restore(); // laptop clip
+
+    // HACKER
+    const hCX=W*0.54, hBotY=floorY, hS=H*0.50;
+    ctx.save(); ctx.fillStyle='#000000';
+    ctx.beginPath();
+    ctx.moveTo(hCX-hS*0.27,hBotY); ctx.lineTo(hCX-hS*0.31,hBotY-hS*0.34);
+    ctx.quadraticCurveTo(hCX-hS*0.37,hBotY-hS*0.50,hCX-hS*0.29,hBotY-hS*0.61);
+    ctx.lineTo(hCX-hS*0.13,hBotY-hS*0.67);
+    ctx.quadraticCurveTo(hCX-hS*0.07,hBotY-hS*0.72,hCX-hS*0.05,hBotY-hS*0.78);
+    ctx.quadraticCurveTo(hCX-hS*0.03,hBotY-hS*0.90,hCX,hBotY-hS*0.95);
+    ctx.quadraticCurveTo(hCX+hS*0.03,hBotY-hS*0.90,hCX+hS*0.05,hBotY-hS*0.78);
+    ctx.quadraticCurveTo(hCX+hS*0.07,hBotY-hS*0.72,hCX+hS*0.13,hBotY-hS*0.67);
+    ctx.lineTo(hCX+hS*0.29,hBotY-hS*0.61);
+    ctx.quadraticCurveTo(hCX+hS*0.37,hBotY-hS*0.50,hCX+hS*0.31,hBotY-hS*0.34);
+    ctx.lineTo(hCX+hS*0.27,hBotY); ctx.closePath(); ctx.fill();
+    [[-1],[1]].forEach(([s])=>{
+      ctx.beginPath();
+      ctx.moveTo(hCX+s*hS*0.29,hBotY-hS*0.61);
+      ctx.quadraticCurveTo(hCX+s*hS*0.41,hBotY-hS*0.51,hCX+s*hS*0.37,hBotY-hS*0.27);
+      ctx.quadraticCurveTo(hCX+s*hS*0.35,hBotY-hS*0.21,hCX+s*hS*0.29,hBotY-hS*0.19);
+      ctx.lineTo(hCX+s*hS*0.19,hBotY-hS*0.21);
+      ctx.quadraticCurveTo(hCX+s*hS*0.17,hBotY-hS*0.27,hCX+s*hS*0.23,hBotY-hS*0.34);
+      ctx.quadraticCurveTo(hCX+s*hS*0.27,hBotY-hS*0.47,hCX+s*hS*0.19,hBotY-hS*0.57);
+      ctx.closePath(); ctx.fill();
+    });
+    ctx.restore();
+    ctx.save(); ctx.globalCompositeOperation='screen';
+    const hg=ctx.createRadialGradient(hCX+hS*0.07,hBotY-hS*0.78,0,hCX+hS*0.07,hBotY-hS*0.78,hS*0.18);
+    hg.addColorStop(0,`rgba(20,140,255,${pulse*1.0})`); hg.addColorStop(1,'rgba(0,0,0,0)');
+    ctx.fillStyle=hg; ctx.fillRect(hCX-hS*0.25,hBotY-hS,hS*0.5,hS*0.35); ctx.restore();
+
+    // KLÁVESNICE
+    const kbW=W*0.26, kbX=hCX-kbW*0.5, kbY=deskY-H*0.010;
+    ctx.fillStyle='#050d18'; ctx.beginPath();
+    ctx.moveTo(kbX,kbY+H*0.015); ctx.lineTo(kbX+kbW,kbY+H*0.015);
+    ctx.lineTo(kbX+kbW-W*0.01,kbY); ctx.lineTo(kbX+W*0.01,kbY); ctx.closePath(); ctx.fill();
+    ctx.fillStyle='#08162a';
+    for(let k=0;k<13;k++){ctx.fillRect(kbX+W*0.012+k*(kbW-W*0.024)/13,kbY+H*0.003,(kbW-W*0.024)/13-2,H*0.005);}
+
+    // SVĚTLO NA STŮL
+    ctx.save(); ctx.globalCompositeOperation='screen';
+    const dl=ctx.createLinearGradient(0,tBack,0,tFront+tThick);
+    dl.addColorStop(0,`rgba(20,100,220,${pulse*0.65})`); dl.addColorStop(1,`rgba(10,60,160,${pulse*0.3})`);
+    ctx.fillStyle=dl; ctx.beginPath(); ctx.moveTo(tL,tBack); ctx.lineTo(tR,tBack); ctx.lineTo(tR,tFront+tThick); ctx.lineTo(tL,tFront+tThick); ctx.closePath(); ctx.fill();
+    ctx.restore();
+
+    // FADES
+    const ft=ctx.createLinearGradient(0,0,0,H*0.12); ft.addColorStop(0,'rgba(1,3,6,1)'); ft.addColorStop(1,'rgba(1,3,6,0)');
+    ctx.fillStyle=ft; ctx.fillRect(0,0,W,H*0.12);
+    const fb=ctx.createLinearGradient(0,H*0.84,0,H); fb.addColorStop(0,'rgba(1,3,6,0)'); fb.addColorStop(1,'rgba(1,3,6,1)');
+    ctx.fillStyle=fb; ctx.fillRect(0,H*0.84,W,H*0.16);
+    const fr=ctx.createLinearGradient(W*0.52,0,W,0); fr.addColorStop(0,'rgba(1,3,6,0)'); fr.addColorStop(1,'rgba(1,3,6,0.94)');
+    ctx.fillStyle=fr; ctx.fillRect(W*0.52,0,W*0.48,H);
+
+    requestAnimationFrame(draw);
+  }
+
+  requestAnimationFrame(draw);
+})();
+</script>
+
+<!-- APP -->
+<script>
+// Panely
+function showPanel(id) {
+  document.querySelectorAll('.panel').forEach(p => p.classList.remove('active'));
+  const el = document.getElementById(id);
+  if (el) el.classList.add('active');
+}
+function showFaq()  { showPanel('panel-faq'); }
+function hideFaq()  { showPanel('panel-register'); }
+function toggleFaq(btn) {
+  const item = btn.closest('.faq-item');
+  const open = item.classList.contains('open');
+  document.querySelectorAll('.faq-item.open').forEach(i => i.classList.remove('open'));
+  if (!open) item.classList.add('open');
+}
+
+// Motto
+const MOTTOS = [
+  'WE ARE TESTERS.','WE ARE MANY.','WE DO NOT FORGIVE BUGS.',
+  'WE DO NOT FORGET INCIDENTS.','WE DO NOT FORGET FAILED DEPLOYS.',
+  'EXPECT OUR REPORTS.','EXPECT OUR JIRA TICKETS.','WE TEST IN THE DARK.',
+];
+let mottoIdx = 0;
+setInterval(() => {
+  const el = document.getElementById('header-motto');
+  if (!el) return;
+  el.style.opacity = '0';
+  setTimeout(() => { mottoIdx = (mottoIdx+1)%MOTTOS.length; el.textContent = MOTTOS[mottoIdx]; el.style.opacity = ''; }, 400);
+}, 3000);
+
+// Countdown — 20.6.2026 18:00
+const CD_TARGET = new Date('2026-06-20T18:00:00').getTime();
+function cdTick() {
+  const diff = CD_TARGET - Date.now();
+  const pad  = v => String(v).padStart(2,'0');
+  const upd  = (id,v) => { const e=document.getElementById(id); if(e) e.textContent=v; };
+  if (diff <= 0) {
+    ['countdown-dd','countdown-hh','countdown-mm','countdown-ss'].forEach(id=>upd(id,'00'));
+    const ms=document.getElementById('countdown-ms'); if(ms) ms.textContent='000';
+    const sub=document.getElementById('countdown-sub'); if(sub) sub.textContent='Hra byla spuštěna.';
+    const box=document.getElementById('countdown-box'); if(box) box.classList.add('urgent');
+    const ew=document.getElementById('entry-wrap'); if(ew) ew.style.display='block';
+    return;
+  }
+  const s=Math.floor(diff/1000);
+  upd('countdown-dd',pad(Math.floor(s/86400)));
+  upd('countdown-hh',pad(Math.floor((s%86400)/3600)));
+  upd('countdown-mm',pad(Math.floor((s%3600)/60)));
+  upd('countdown-ss',pad(s%60));
+  const ms=Math.floor(diff%1000);
+  const msEl=document.getElementById('countdown-ms'); if(msEl) msEl.textContent=String(ms).padStart(3,'0');
+  const box=document.getElementById('countdown-box'); if(box) box.classList.toggle('urgent',diff<60000);
+  setTimeout(cdTick, 50);
+}
+
+document.addEventListener('DOMContentLoaded', () => {
+  cdTick();
+  const vEl=document.getElementById('app-version'); if(vEl) vEl.textContent='v3.7.5';
+});
+</script>
+
+</body>
+</html>
